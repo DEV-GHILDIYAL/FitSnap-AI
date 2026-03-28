@@ -37,7 +37,7 @@ jobs:
           NEXTAUTH_URL: "https://fitsnap.ai"
 
       - name: Deploy to AWS Lambda (Serverless)
-        run: npx serverless deploy --stage prod --verbose
+        run: npx serverless@3 deploy --stage prod --verbose
         env:
           # Serverless expects core AWS environment credentials
           AWS_ACCESS_KEY_ID: ${{ secrets.CUSTOM_AWS_ACCESS_KEY_ID }}
