@@ -1,0 +1,41 @@
+service: fitsnap-ai
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  architecture: x86_64
+  memorySize: 1024
+  timeout: 30 # Increased timeout for backend Replicate AI calls
+  environment:
+    # Lambda Web Adapter listens on port 8080 by default
+    PORT: 8080
+    AWS_LWA_INVOKE_MODE: response_stream
+    # Forward mapped `.env` logic natively
+    REPLICATE_API_TOKEN: ${env:REPLICATE_API_TOKEN, ''}
+    CUSTOM_AWS_ACCESS_KEY_ID: ${env:CUSTOM_AWS_ACCESS_KEY_ID, ''}
+    CUSTOM_AWS_SECRET_ACCESS_KEY: ${env:CUSTOM_AWS_SECRET_ACCESS_KEY, ''}
+    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME, ''}
+    AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
+
+functions:
+  web:
+    handler: run.sh
+    layers:
+      # Official AWS Serverless Web Adapter Layer (v0.8.3, us-east-1 x86_64)
+      - arn:aws:lambda:us-east-1:753240598075:layer:LambdaAdapterLayerX86:23
+    events:
+      - httpApi: '*'
+
+package:
+  patterns:
+    - "!.git/**"
+    - "!src/**"
+    - "!node_modules/**"
+    - "!.next/cache/**"
+    - "!.vercel/**"
+    # Essential Next.js runtime output logic
+    - ".next/standalone/**"
+    - ".next/static/**"
+    - "public/**"
+    - "run.sh"

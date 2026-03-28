@@ -1,0 +1,51 @@
+name: Deploy Next.js SaaS to AWS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    name: Build & Deploy to AWS Lambda
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Secure Dependencies
+        run: npm ci
+
+      - name: Production Build & Package
+        run: npm run build:lambda
+        env:
+          NEXTAUTH_URL: "https://fitsnap.ai" # Or your actual production domain
+          # Add any other build-time essential env keys here if needed
+
+      - name: Deploy to AWS Lambda (Serverless)
+        run: npx serverless deploy --stage prod --verbose
+        env:
+          # Serverless expects core AWS environment credentials
+          AWS_ACCESS_KEY_ID: ${{ secrets.CUSTOM_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CUSTOM_AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+
+          # Explicit Fallback Mapping for our specific Backend Scripts
+          CUSTOM_AWS_ACCESS_KEY_ID: ${{ secrets.CUSTOM_AWS_ACCESS_KEY_ID }}
+          CUSTOM_AWS_SECRET_ACCESS_KEY: ${{ secrets.CUSTOM_AWS_SECRET_ACCESS_KEY }}
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
