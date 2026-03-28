@@ -10,6 +10,12 @@ jobs:
   deploy:
     name: Build & Deploy to AWS Lambda
     runs-on: ubuntu-latest
+    
+    # Crucial: Since your Next.js project is nested inside "fitsnap-ai" folder, 
+    # all runner commands must execute inside it.
+    defaults:
+      run:
+        working-directory: ./fitsnap-ai
 
     steps:
       - name: Checkout Code
@@ -20,6 +26,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: './fitsnap-ai/package-lock.json'
 
       - name: Install Secure Dependencies
         run: npm ci
@@ -27,8 +34,7 @@ jobs:
       - name: Production Build & Package
         run: npm run build:lambda
         env:
-          NEXTAUTH_URL: "https://fitsnap.ai" # Or your actual production domain
-          # Add any other build-time essential env keys here if needed
+          NEXTAUTH_URL: "https://fitsnap.ai"
 
       - name: Deploy to AWS Lambda (Serverless)
         run: npx serverless deploy --stage prod --verbose
