@@ -8,7 +8,7 @@ import { dynamoDb } from "@/lib/dynamodb";
 
 // Ensure AWS SDK forces usage of these environment variables natively or explicitly
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "us-east-1",
+  region: process.env.CUSTOM_AWS_REGION || process.env.AWS_REGION || "us-east-1",
   credentials: {
     // Prefix custom so standard Lambda STS doesn't overshadow it
     accessKeyId: process.env.CUSTOM_AWS_ACCESS_KEY_ID || "",
@@ -121,7 +121,7 @@ export async function POST(request) {
         );
         
         // Construct the public URL
-        publicS3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${fileName}`;
+        publicS3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.CUSTOM_AWS_REGION || process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${fileName}`;
         console.info(JSON.stringify({ event: "s3_upload_success", s3Url: publicS3Url }));
         
       } catch (s3Err) {

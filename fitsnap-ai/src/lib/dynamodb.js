@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
 const ddbClient = new DynamoDBClient({
-  region: process.env.AWS_REGION || "us-east-1",
+  region: process.env.CUSTOM_AWS_REGION || process.env.AWS_REGION || "us-east-1",
   credentials: {
     // Specifically mapped for the standalone lambda architecture pattern
     accessKeyId: process.env.CUSTOM_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "",

@@ -16,7 +16,7 @@ provider:
     CUSTOM_AWS_ACCESS_KEY_ID: ${env:CUSTOM_AWS_ACCESS_KEY_ID, ''}
     CUSTOM_AWS_SECRET_ACCESS_KEY: ${env:CUSTOM_AWS_SECRET_ACCESS_KEY, ''}
     S3_BUCKET_NAME: ${env:S3_BUCKET_NAME, ''}
-    AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
+    CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION, 'us-east-1'}
 
 functions:
   web:
