@@ -123,9 +123,9 @@ export default function ImageUpload({ label, description, icon, onImageSelect, a
               </svg>
             </div>
             <p className={styles.uploadText}>
-              <span className={styles.uploadHighlight}>Click to upload</span> or drag & drop
+              <span className={styles.uploadHighlight}>Click to upload {label.split(' ').pop()}</span>
             </p>
-            <p className={styles.uploadHint}>PNG, JPG, WEBP up to 10MB</p>
+            <p className={styles.uploadHint}>Drag & drop photo here</p>
           </div>
         )}
 

@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ImageUpload from "@/components/ImageUpload";
-import PreviewSection from "@/components/PreviewSection";
 import GenerateButton from "@/components/GenerateButton";
 import ResultSection from "@/components/ResultSection";
 import PresetOutfits from "@/components/PresetOutfits";
@@ -121,21 +120,21 @@ export default function Home() {
       <section className={styles.uploadSection}>
         <div className={styles.uploadGrid}>
           <ImageUpload
-            title="1. Your Photo"
-            subtitle="Clear, front-facing"
-            image={userImage}
-            onImageLoad={handleUserImage}
-            onClear={() => setUserImage(null)}
+            label="1. Your Face"
+            description="Front-facing, clear light"
+            icon="👤"
+            externalPreview={userImage}
+            onImageSelect={handleUserImage}
           />
 
           {/* Outfit upload has preset logic injected */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <ImageUpload
-              title="2. The Outfit"
-              subtitle="Flat lay or model"
-              image={outfitImage}
-              onImageLoad={handleOutfitImage}
-              onClear={() => setOutfitImage(null)}
+              label="2. The Outfit"
+              description="Flat lay or model photo"
+              icon="👗"
+              externalPreview={outfitImage}
+              onImageSelect={handleOutfitImage}
             />
             {/* Built-in quick select purely local to Studio without needing `/catalog` routing */}
             <PresetOutfits onSelect={(url) => setOutfitImage(url)} />
@@ -160,14 +159,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Generation & Result Pipeline */}
-      <PreviewSection
-        userImage={userImage}
-        outfitImage={outfitImage}
-        isReady={bothReady}
-        isLoading={isLoading}
-      />
 
       <GenerateButton
         onClick={handleGenerate}
