@@ -1,10 +1,10 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xl);
-  max-width: 1200px;
+  gap: 24px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: var(--space-3xl) var(--space-xl);
+  padding: 32px 24px;
   min-height: 100vh;
   animation: fadeInUp 0.5s var(--transition-normal);
 }
@@ -12,79 +12,88 @@
 .header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  text-align: center;
-  align-items: center;
+  gap: 8px;
+  text-align: left;
+  align-items: flex-start;
 }
 
 .title {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
   font-weight: 800;
   color: var(--text-primary);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 .subtitle {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
-  max-width: 600px;
+  max-width: 500px;
+  line-height: 1.5;
 }
 
 .filtersWrapper {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-xl);
-  margin-top: var(--space-md);
+  gap: 16px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--bg-hover);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .filtersWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
 }
 
 .pillContainer {
   display: flex;
-  gap: var(--space-sm);
-  background: var(--bg-secondary);
-  padding: 4px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-subtle);
+  gap: 4px;
 }
 
 .pillBtn {
-  padding: 8px 24px;
-  font-size: 0.95rem;
+  padding: 6px 16px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
-  border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
 
 .pillBtn:hover {
   color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .activePill {
-  background: var(--bg-card);
+  background: var(--bg-primary) !important;
   color: var(--text-primary);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tabsContainer {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-md);
-  border-bottom: 2px solid var(--border-subtle);
-  width: 100%;
-  max-width: 600px;
+  gap: 8px;
 }
 
 .tabBtn {
-  padding: 12px 24px;
-  font-size: 1rem;
+  padding: 6px 16px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
   background: transparent;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px; /* Pull down over strict border */
-  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .tabBtn:hover {
@@ -93,21 +102,22 @@
 
 .activeTab {
   color: var(--text-primary);
-  border-bottom-color: var(--accent-color);
+  border-color: var(--border-color);
+  background: var(--bg-primary);
 }
 
 .catalogGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--space-xl);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
 }
 
 .catalogCard {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 12px;
   cursor: pointer;
-  transition: transform var(--transition-normal);
+  transition: transform 0.2s ease;
 }
 
 .catalogCard:hover {
@@ -117,12 +127,11 @@
 .imageWrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 3/4;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  aspect-ratio: 1/1.2;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
 }
 
 .image {
@@ -179,7 +188,7 @@
 }
 
 .itemName {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
