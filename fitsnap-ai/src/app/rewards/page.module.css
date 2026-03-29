@@ -66,20 +66,29 @@
 
 .inputGroup {
   display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
 .linkInput {
   flex: 1;
-  padding: 16px 20px;
+  padding: 14px 18px;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   color: var(--text-primary);
-  font-family: monospace;
-  font-size: 1.05rem;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.95rem;
   outline: none;
   transition: all 0.2s;
+  min-width: 0;
+}
+
+@media (min-width: 850px) {
+  .inputGroup {
+    flex-direction: row;
+    align-items: stretch;
+  }
 }
 
 .linkInput:focus {
@@ -88,20 +97,68 @@
 }
 
 .copyBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   background: var(--text-primary);
   color: var(--bg-primary);
   border: none;
-  padding: 0 32px;
+  padding: 14px 28px;
   border-radius: 12px;
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
 }
 
 .copyBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  filter: brightness(1.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.copyBtn svg {
+  opacity: 0.8;
+}
+
+.whatsappBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #25d366;
+  color: #0d1117; /* Dark text for better contrast on neon green */
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+}
+
+.whatsappBtn:hover {
+  background: #22c35e;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+}
+
+.actionRow {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 500px) {
+  .actionRow {
+    flex-direction: column;
+  }
 }
 
 .copied {
