@@ -6,24 +6,34 @@ provider:
   region: us-east-1
   architecture: x86_64
   memorySize: 1024
-  timeout: 30 # Increased timeout for backend Replicate AI calls
+  timeout: 30
   environment:
-    # Lambda Web Adapter listens on port 8080 by default
+    # ── AWS Lambda Web Adapter (CRITICAL) ──
+    # This tells Lambda to execute run.sh via the Web Adapter layer
+    # instead of treating "run.sh" as a Node.js module import.
+    AWS_LAMBDA_EXEC_WRAPPER: /opt/bootstrap
     PORT: 8080
     AWS_LWA_INVOKE_MODE: response_stream
-    # Forward mapped `.env` logic natively
+    # ── Application Environment Variables ──
     REPLICATE_API_TOKEN: ${env:REPLICATE_API_TOKEN, ''}
     CUSTOM_AWS_ACCESS_KEY_ID: ${env:CUSTOM_AWS_ACCESS_KEY_ID, ''}
     CUSTOM_AWS_SECRET_ACCESS_KEY: ${env:CUSTOM_AWS_SECRET_ACCESS_KEY, ''}
     S3_BUCKET_NAME: ${env:S3_BUCKET_NAME, ''}
     CUSTOM_AWS_REGION: ${env:CUSTOM_AWS_REGION, 'us-east-1'}
+    NEXTAUTH_URL: ${env:NEXTAUTH_URL, ''}
+    NEXTAUTH_SECRET: ${env:NEXTAUTH_SECRET, ''}
+    GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID, ''}
+    GOOGLE_CLIENT_SECRET: ${env:GOOGLE_CLIENT_SECRET, ''}
+    RAZORPAY_KEY_ID: ${env:RAZORPAY_KEY_ID, ''}
+    RAZORPAY_KEY_SECRET: ${env:RAZORPAY_KEY_SECRET, ''}
 
 functions:
   web:
     handler: run.sh
     layers:
-      # Official AWS Serverless Web Adapter Layer (v0.8.3, us-east-1 x86_64)
-      - arn:aws:lambda:us-east-1:753240598075:layer:LambdaAdapterLayerX86:23
+      # Official AWS Lambda Web Adapter Layer (v0.8.4, x86_64)
+      # https://github.com/awslabs/aws-lambda-web-adapter
+      - arn:aws:lambda:us-east-1:753240598075:layer:LambdaAdapterLayerX86:27
     events:
       - httpApi: '*'
 
@@ -34,7 +44,8 @@ package:
     - "!node_modules/**"
     - "!.next/cache/**"
     - "!.vercel/**"
-    # Essential Next.js runtime output logic
+    - "!.env*"
+    # Essential Next.js standalone runtime
     - ".next/standalone/**"
     - ".next/static/**"
     - "public/**"

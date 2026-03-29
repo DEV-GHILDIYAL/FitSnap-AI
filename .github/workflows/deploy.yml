@@ -11,7 +11,7 @@ jobs:
     name: Build & Deploy to AWS Lambda
     runs-on: ubuntu-latest
     
-    # Crucial: Since your Next.js project is nested inside "fitsnap-ai" folder, 
+    # Since the Next.js project is nested inside "fitsnap-ai" folder,
     # all runner commands must execute inside it.
     defaults:
       run:
@@ -31,20 +31,23 @@ jobs:
       - name: Install Secure Dependencies
         run: npm ci
 
+      - name: Make run.sh executable
+        run: chmod +x run.sh
+
       - name: Production Build & Package
         run: npm run build:lambda
         env:
-          NEXTAUTH_URL: "https://fitsnap.ai"
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
 
       - name: Deploy to AWS Lambda (Serverless)
         run: npx serverless@3 deploy --stage prod --verbose
         env:
-          # Serverless expects core AWS environment credentials
+          # Serverless CLI / AWS CLI credentials
           AWS_ACCESS_KEY_ID: ${{ secrets.CUSTOM_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CUSTOM_AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: us-east-1
 
-          # Explicit Fallback Mapping for our specific Backend Scripts
+          # Application-level env vars forwarded to Lambda via serverless.yml
           CUSTOM_AWS_ACCESS_KEY_ID: ${{ secrets.CUSTOM_AWS_ACCESS_KEY_ID }}
           CUSTOM_AWS_SECRET_ACCESS_KEY: ${{ secrets.CUSTOM_AWS_SECRET_ACCESS_KEY }}
           CUSTOM_AWS_REGION: us-east-1
