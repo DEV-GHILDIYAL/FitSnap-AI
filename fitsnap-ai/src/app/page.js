@@ -8,7 +8,6 @@ import GenerateButton from "@/components/GenerateButton";
 import ResultSection from "@/components/ResultSection";
 import PresetOutfits from "@/components/PresetOutfits";
 import LoadingOverlay from "@/components/LoadingOverlay";
-import WardrobeGallery from "@/components/WardrobeGallery";
 import { useSession } from "next-auth/react";
 import styles from "./page.module.css";
 
@@ -38,6 +37,7 @@ export default function Home() {
   const [resultUrl, setResultUrl] = useState(null);
   const [errorText, setErrorText] = useState("");
   const [credits, setCredits] = useState(null);
+  const [generationMode, setGenerationMode] = useState("fast"); // "fast" | "pro"
 
   const { data: session, status } = useSession();
 
@@ -74,7 +74,7 @@ export default function Home() {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userImage, outfitImage }),
+        body: JSON.stringify({ userImage, outfitImage, mode: generationMode }),
       });
       
       const data = await response.json();
@@ -117,50 +117,86 @@ export default function Home() {
         </p>
       </header>
 
-      {/* Upload Section */}
+      {/* Upload & Setup Section */}
       <section className={styles.uploadSection}>
         <div className={styles.uploadGrid}>
           <ImageUpload
-            label="Your Photo"
-            description="Upload a clear photo of yourself"
-            icon="📸"
-            onImageSelect={handleUserImage}
+            title="1. Your Photo"
+            subtitle="Clear, front-facing"
+            image={userImage}
+            onImageLoad={handleUserImage}
+            onClear={() => setUserImage(null)}
           />
-          <div>
+
+          {/* Outfit upload has preset logic injected */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <ImageUpload
-              label="Outfit"
-              description="Upload the outfit you want to try"
-              icon="👗"
-              onImageSelect={handleOutfitImage}
-              externalPreview={outfitImage}
+              title="2. The Outfit"
+              subtitle="Flat lay or model"
+              image={outfitImage}
+              onImageLoad={handleOutfitImage}
+              onClear={() => setOutfitImage(null)}
             />
-            <PresetOutfits onSelect={handleOutfitImage} />
+            {/* Built-in quick select purely local to Studio without needing `/catalog` routing */}
+            <PresetOutfits onSelect={(url) => setOutfitImage(url)} />
+          </div>
+        </div>
+
+        {/* AI Selection Toggle */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+          <div className={styles.modeToggleWrapper}>
+            <button 
+              className={`${styles.modeToggleBtn} ${generationMode === 'fast' ? styles.modeToggleActive : ''}`}
+              onClick={() => setGenerationMode('fast')}
+            >
+              ⚡ Fast (1 Credit)
+            </button>
+            <button 
+              className={`${styles.modeToggleBtn} ${generationMode === 'pro' ? styles.modeToggleActive : ''}`}
+              onClick={() => setGenerationMode('pro')}
+            >
+              ✨ Pro HD (2 Credits)
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Preview */}
-      <PreviewSection userImage={userImage} outfitImage={outfitImage} />
+      {/* Generation & Result Pipeline */}
+      <PreviewSection
+        userImage={userImage}
+        outfitImage={outfitImage}
+        isReady={bothReady}
+        isLoading={isLoading}
+      />
 
-      {/* Error / Retry Message */}
+      <GenerateButton
+        onClick={handleGenerate}
+        disabled={!bothReady || isLoading}
+        isLoading={isLoading}
+      />
+
       {errorText && (
-        <div className={styles.errorBanner} style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            {errorText}
-          </span>
-          <button 
-            onClick={handleGenerate} 
-            disabled={isLoading}
-            style={{ padding: '4px 12px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', color: '#fff', cursor: 'pointer' }}
-          >
-            Try Again
-          </button>
+        <div className={styles.errorBanner}>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          {errorText}
         </div>
+      )}
+
+      {resultUrl && (
+        <ResultSection
+          resultImage={resultUrl}
+          originalUserImage={userImage}
+          onReset={() => {
+            setUserImage(null);
+            setOutfitImage(null);
+            setResultUrl(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
       )}
 
       {/* Server-Side Enforced Usage Limit Message */}

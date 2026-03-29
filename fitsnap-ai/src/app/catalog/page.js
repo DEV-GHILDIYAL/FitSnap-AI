@@ -10,44 +10,18 @@ const CATEGORIES = ["Tops", "Bottoms", "Full Body", "Traditional"];
 // Massive mock database spanning genders and categories
 const CATALOG_ITEMS = [
   // --- MEN: Tops ---
-  { id: "m-t1", name: "Men's White Basic Tee", gender: "Men", category: "Tops", url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-t2", name: "Men's Vintage Denim Jacket", gender: "Men", category: "Tops", url: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-t3", name: "Men's Urban Black Hoodie", gender: "Men", category: "Tops", url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-t4", name: "Men's Plaid Flannel Shirt", gender: "Men", category: "Tops", url: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-t5", name: "Men's Tailored Blazer", gender: "Men", category: "Tops", url: "https://images.unsplash.com/photo-1594938291404-5fde188ebcd8?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-t6", name: "Men's Heavy Winter Coat", gender: "Men", category: "Tops", url: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?q=80&w=800&auto=format&fit=crop" },
-
-  // --- MEN: Bottoms ---
-  { id: "m-b1", name: "Men's Classic Blue Jeans", gender: "Men", category: "Bottoms", url: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-b2", name: "Men's Black Trousers", gender: "Men", category: "Bottoms", url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-b3", name: "Men's Casual Cargo Shorts", gender: "Men", category: "Bottoms", url: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-b4", name: "Men's Chinos Sand", gender: "Men", category: "Bottoms", url: "https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?q=80&w=800&auto=format&fit=crop" },
-
-  // --- MEN: Full Body & Traditional ---
-  { id: "m-f1", name: "Men's Navy Business Suit", gender: "Men", category: "Full Body", url: "https://images.unsplash.com/photo-1594938291404-5fde188ebcd8?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-f2", name: "Men's Royal Silk Kurta", gender: "Men", category: "Traditional", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=800&auto=format&fit=crop" },
-  { id: "m-f3", name: "Men's Formal Tuxedo", gender: "Men", category: "Full Body", url: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop" },
+  { id: "m1", name: "Men's Casual Shirt", gender: "Men", category: "Tops", url: "/catalog/casual-shirt.png" },
+  { id: "m2", name: "Men's Blazer", gender: "Men", category: "Tops", url: "/catalog/blazer.png" },
+  { id: "m4", name: "Men's Hoodie", gender: "Men", category: "Tops", url: "/catalog/hoodie.png" },
+  { id: "m-t4", name: "Men's Kurta", gender: "Men", category: "Traditional", url: "/catalog/kurta.png" },
 
   // --- WOMEN: Tops ---
-  { id: "w-t1", name: "Women's Silk Blouse", gender: "Women", category: "Tops", url: "https://images.unsplash.com/photo-1503342394128-c104d54dba01?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-t2", name: "Women's Oversized Sweater", gender: "Women", category: "Tops", url: "https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-t3", name: "Women's Cropped Jacket", gender: "Women", category: "Tops", url: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-t4", name: "Women's Chic Blazer", gender: "Women", category: "Tops", url: "https://images.unsplash.com/photo-1594938291404-5fde188ebcd8?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-t5", name: "Women's Classic White Tee", gender: "Women", category: "Tops", url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-t6", name: "Women's Winter Trench", gender: "Women", category: "Tops", url: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?q=80&w=800&auto=format&fit=crop" },
-
-  // --- WOMEN: Bottoms ---
-  { id: "w-b1", name: "Women's High-Waist Jeans", gender: "Women", category: "Bottoms", url: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-b2", name: "Women's Pleated Midi Skirt", gender: "Women", category: "Bottoms", url: "https://images.unsplash.com/photo-1583496661160-c5a87b7ced12?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-b3", name: "Women's Flared Trousers", gender: "Women", category: "Bottoms", url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-b4", name: "Women's Denim Shorts", gender: "Women", category: "Bottoms", url: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?q=80&w=800&auto=format&fit=crop" },
-
-  // --- WOMEN: Full Body & Traditional ---
-  { id: "w-f1", name: "Women's Evening Black Dress", gender: "Women", category: "Full Body", url: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-f2", name: "Women's Summer Floral Jumpsuit", gender: "Women", category: "Full Body", url: "https://images.unsplash.com/photo-1485231183945-fc4ef547b71d?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-f3", name: "Women's Beige Silk Saree", gender: "Women", category: "Traditional", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=800&auto=format&fit=crop" },
-  { id: "w-f4", name: "Women's Wedding Lehenga", gender: "Women", category: "Traditional", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=800&auto=format&fit=crop" }, // Shared image ref
-  { id: "w-f5", name: "Women's Cotton Kurti", gender: "Women", category: "Traditional", url: "https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?q=80&w=800&auto=format&fit=crop" },
+  { id: "w-t1", name: "Women's Casual Top", gender: "Women", category: "Tops", url: "/catalog/casual-shirt.png" },
+  { id: "w-t2", name: "Women's Comfort Hoodie", gender: "Women", category: "Tops", url: "/catalog/hoodie.png" },
+  
+  // --- WOMEN: Traditional & Full Body ---
+  { id: "w-f3", name: "Women's Silk Saree Look", gender: "Women", category: "Traditional", url: "/catalog/kurta.png" },
+  { id: "w-f4", name: "Women's Evening Blazer", gender: "Women", category: "Full Body", url: "/catalog/blazer.png" }, 
 ];
 
 export default function CatalogPage() {

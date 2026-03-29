@@ -88,6 +88,33 @@ export default function Sidebar() {
             </svg>
             My Profile
           </Link>
+
+          <Link href="/wardrobe" onClick={() => setMobileOpen(false)} className={`${styles.link} ${pathname === "/wardrobe" ? styles.active : ""}`}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            My Wardrobe
+          </Link>
+
+          <div className={styles.navSeparator} />
+
+          <button onClick={() => alert("Coming soon! Share link utility under development.")} className={`${styles.link} ${styles.placeholderLink}`}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 16 16 12 12 8"></polyline>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            Refer & Earn
+          </button>
+
+          <button onClick={() => alert("Coming soon! Explore community outfits.")} className={`${styles.link} ${styles.placeholderLink}`}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+            </svg>
+            Community Explore
+          </button>
         </nav>
 
         <div className={styles.bottomSection}>

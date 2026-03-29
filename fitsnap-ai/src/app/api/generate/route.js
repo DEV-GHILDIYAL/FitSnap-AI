@@ -47,6 +47,12 @@ export async function POST(request) {
     }
     const userId = session.user.email;
 
+    // --- Parse body ---
+    const body = await request.json();
+    const { userImage, outfitImage, mode = "fast" } = body;
+
+    const creditCost = mode === "pro" ? 2 : 1;
+
     // --- Validate DynamoDB Credits ---
     const userRecord = await dynamoDb.send(
       new GetCommand({
@@ -55,13 +61,11 @@ export async function POST(request) {
       })
     );
 
-    if (!userRecord.Item || userRecord.Item.credits <= 0) {
-      return NextResponse.json({ error: "No credits left. Please upgrade." }, { status: 403 });
-    }
+    const currentBalance = userRecord.Item ? userRecord.Item.credits : 0;
 
-    // --- Parse body ---
-    const body = await request.json();
-    const { userImage, outfitImage } = body;
+    if (currentBalance < creditCost) {
+      return NextResponse.json({ error: `Not enough credits. ${mode === 'pro' ? 'Pro mode requires 2 credits.' : 'Requires 1 credit.'}` }, { status: 403 });
+    }
 
     if (!userImage || !outfitImage) {
       return NextResponse.json(
@@ -73,13 +77,15 @@ export async function POST(request) {
     // --- Call Replicate ---
     console.info(JSON.stringify({ event: "generation_started", timestamp: new Date().toISOString() }));
 
+    const inferenceSteps = mode === "pro" ? 45 : 25;
+
     const output = await replicate.run(MODEL, {
       input: {
         human_img: userImage,
         garm_img: outfitImage,
         garment_des: "clothing item",
         category: "upper_body",
-        steps: 30,
+        steps: inferenceSteps,
         seed: 42,
       },
     });
@@ -132,23 +138,21 @@ export async function POST(request) {
 
     console.info(JSON.stringify({ event: "generation_success", outputUrl: publicS3Url, timestamp: new Date().toISOString() }));
     
-    // --- Deduct Credit on completely successful generation ---
-    try {
-      await dynamoDb.send(
-        new UpdateCommand({
-          TableName: "users",
-          Key: { userId },
-          UpdateExpression: "SET credits = credits - :val",
-          ExpressionAttributeValues: {
-            ":val": 1,
-            ":min": 0,
-          },
-          ConditionExpression: "credits > :min",
-        })
-      );
-      console.info(`[Credits] Deducted 1 credit for ${userId}`);
+    // --- Decrement credits based on usage tier ---
+    const updatedUser = await dynamoDb.send(
+      new UpdateCommand({
+        TableName: "users",
+        Key: { userId },
+        UpdateExpression: "SET credits = credits - :cost",
+        ExpressionAttributeValues: {
+          ":cost": creditCost,
+        },
+        ReturnValues: "UPDATED_NEW",
+      })
+    );
 
-      // --- Log Output to History Gallery ---
+    // --- Log Output to History Gallery ---
+    try {
       await dynamoDb.send(
         new PutCommand({
           TableName: "generations",
@@ -156,7 +160,6 @@ export async function POST(request) {
             userId,
             createdAt: new Date().toISOString(),
             resultUrl: publicS3Url
-            // Optional: outfitImage could be stored here if we want to fetch the "before" mapping.
           }
         })
       );
