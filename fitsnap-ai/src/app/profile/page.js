@@ -147,41 +147,39 @@ export default function ProfilePage() {
           </div>
 
           <div className={styles.dashboardGrid}>
-            {/* Left: Premium Member Card & Top Up */}
+            {/* Left: Premium Member Card & Status */}
             <div className={styles.sideContent}>
               <section className={styles.memberCard}>
                 <div className={styles.cardHeader}>
                   <div className={styles.chip} />
-                  <span className={styles.memberType}>Gold Member</span>
+                  <span className={styles.memberType}>Exclusive Member</span>
                 </div>
                 
                 <div className={styles.creditDisplay}>
                   <div className={styles.creditValue}>
                     {loadingCredits ? "..." : displayCredits}
                   </div>
-                  <span className={styles.creditLabel}>Total Generation Credits</span>
+                  <span className={styles.creditLabel}>Live Credits Available</span>
                 </div>
+
+                <button 
+                  className={styles.buyCreditsShortcut}
+                  onClick={() => router.push("/pricing")}
+                >
+                  ✨ Buy More Credits
+                </button>
               </section>
 
-              <section className={styles.card} style={{ marginTop: "24px" }}>
-                <h2 className={styles.cardTitle}>Top Up Credits</h2>
-                <div className={styles.pricingGrid}>
-                  <div className={styles.pricingTier}>
-                    <div className={styles.tierHeader}>
-                      <span className={styles.tierCredits}>20 Credits</span>
-                      <span className={styles.tierPrice}>₹99</span>
-                    </div>
-                    <button className={styles.buyBtn} onClick={() => handlePayment(99)}>Purchase</button>
-                  </div>
-                  <div className={`${styles.pricingTier} ${styles.popularTier}`}>
-                    <div className={styles.tierHeader}>
-                      <span className={styles.tierCredits}>50 Credits</span>
-                      <span className={styles.tierPrice}>₹199</span>
-                    </div>
-                    <button className={`${styles.buyBtn} ${styles.popularBtn}`} onClick={() => handlePayment(199)}>Get Popular Bundle</button>
-                  </div>
+              <div className={styles.profileStats}>
+                <div className={styles.statLine}>
+                  <span>Total Generations</span>
+                  <strong>{history.length}+</strong>
                 </div>
-              </section>
+                <div className={styles.statLine}>
+                  <span>Member Since</span>
+                  <strong>{new Date().getFullYear()}</strong>
+                </div>
+              </div>
             </div>
 
             {/* Right: Activity Feed */}

@@ -27,8 +27,12 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid cryptographic signature. Transaction Spoofing Prevented." }, { status: 400 });
     }
 
-    // 2. Decode Tier Math
-    const creditsToAdd = amount === 99 ? 20 : 50;
+    // 2. Decode Tier Math (Testing Mode: 1, 2, 3)
+    let creditsToAdd = 0;
+    if (amount === 1) creditsToAdd = 20;
+    else if (amount === 2) creditsToAdd = 50;
+    else if (amount === 3) creditsToAdd = 150;
+    else creditsToAdd = Math.floor(amount * 20); // Fallback: 20 per rupee for testing
 
     // 3. Atomically Update DynamoDB Live Credits
     await dynamoDb.send(

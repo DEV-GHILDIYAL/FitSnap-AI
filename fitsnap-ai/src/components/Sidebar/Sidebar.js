@@ -100,6 +100,15 @@ export default function Sidebar() {
 
           <div className={styles.navSeparator} />
 
+          <Link href="/pricing" onClick={() => setMobileOpen(false)} className={`${styles.link} ${pathname === "/pricing" ? styles.active : ""}`}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            Buy Credits ✨
+          </Link>
+
+          <div className={styles.navSeparator} />
+
           <Link href="/rewards" onClick={() => setMobileOpen(false)} className={`${styles.link} ${pathname === "/rewards" ? styles.active : ""}`}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
@@ -109,12 +118,12 @@ export default function Sidebar() {
             Refer & Earn
           </Link>
 
-          <Link href="/explore" onClick={() => setMobileOpen(false)} className={`${styles.link} ${pathname === "/explore" ? styles.active : ""}`}>
+{/* <Link href="/explore" onClick={() => setMobileOpen(false)} className={`${styles.link} ${pathname === "/explore" ? styles.active : ""}`}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
             </svg>
             Community Explore
-          </Link>
+          </Link> */}
         </nav>
 
         <div className={styles.bottomSection}>

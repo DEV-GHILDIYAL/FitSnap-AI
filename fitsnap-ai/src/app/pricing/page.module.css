@@ -1,0 +1,180 @@
+.container {
+  padding: 80px 2.5rem;
+  width: 100%;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  animation: fadeInUp 0.5s var(--transition-normal);
+}
+
+.header {
+  text-align: center;
+  max-width: 700px;
+}
+
+.title {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  background: linear-gradient(to bottom, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.tierCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tierCard:hover {
+  transform: translateY(-8px);
+  border-color: var(--accent-emerald);
+  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.1);
+}
+
+.popularCard {
+  border: 2px solid var(--accent-emerald);
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(16, 185, 129, 0.05) 100%);
+  transform: scale(1.05);
+}
+
+.popularBadge {
+  position: absolute;
+  top: 16px;
+  right: -32px;
+  background: var(--accent-emerald);
+  color: white;
+  padding: 6px 40px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  transform: rotate(45deg);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tierInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tierName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-emerald);
+}
+
+.tierPriceWrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.currency {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.price {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.creditsCount {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.featuresList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.checkIcon {
+  color: var(--accent-emerald);
+  flex-shrink: 0;
+}
+
+.buyBtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  transition: opacity 0.2s ease;
+  margin-top: auto;
+}
+
+.buyBtn:hover {
+  opacity: 0.9;
+}
+
+.buyBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.popularBtn {
+  background: var(--accent-emerald);
+  color: white;
+}
+
+.guarantee {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
