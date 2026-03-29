@@ -31,13 +31,12 @@ jobs:
       - name: Install Secure Dependencies
         run: npm ci
 
-      - name: Make run.sh executable
-        run: chmod +x run.sh
-
-      - name: Production Build & Package
-        run: npm run build:lambda
+      - name: Build and Configure Executables
+        run: |
+          npm run build:lambda
+          chmod +x run.sh
         env:
-          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXTAUTH_URL: "https://fitsnap.ai"
 
       - name: Deploy to AWS Lambda (Serverless)
         run: npx serverless@3 deploy --stage prod --verbose

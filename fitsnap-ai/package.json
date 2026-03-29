@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:lambda": "next build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/",
-    "deploy": "npm run build:lambda && npx serverless@3 deploy",
+    "deploy": "chmod +x run.sh && npm run build:lambda && npx serverless@3 deploy",
     "start": "next start",
     "lint": "eslint"
   },

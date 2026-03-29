@@ -31,11 +31,10 @@ functions:
   web:
     handler: run.sh
     layers:
-      # Official AWS Lambda Web Adapter Layer (v0.8.4, x86_64)
-      # https://github.com/awslabs/aws-lambda-web-adapter
-      - arn:aws:lambda:us-east-1:753240598075:layer:LambdaAdapterLayerX86:27
-    events:
-      - httpApi: '*'
+      # Official AWS Serverless Web Adapter Layer (v0.8.3, us-east-1 x86_64)
+      - arn:aws:lambda:us-east-1:753240598075:layer:LambdaAdapterLayerX86:23
+    # Natively supports response streaming and >30s timeouts
+    url: true
 
 package:
   patterns:
