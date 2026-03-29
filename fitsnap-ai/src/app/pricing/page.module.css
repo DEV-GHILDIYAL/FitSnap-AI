@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 48px;
+  gap: 24px;
   animation: fadeInUp 0.5s var(--transition-normal);
 }
 
@@ -16,14 +16,11 @@
 }
 
 .title {
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-size: clamp(2.5rem, 5vw, 3.2rem);
   font-weight: 800;
   letter-spacing: -0.04em;
-  line-height: 1.1;
-  margin-bottom: 16px;
-  background: linear-gradient(to bottom, var(--text-primary), var(--text-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
+  margin-bottom: 8px;
 }
 
 .subtitle {
@@ -34,23 +31,37 @@
 
 .pricingGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1280px) {
+  .pricingGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .pricingGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .tierCard {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 24px;
-  padding: 40px 32px;
+  border-radius: 16px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  gap: 16px;
+  transition: all 0.25s ease;
   position: relative;
   overflow: hidden;
+  text-align: center;
 }
 
 .tierCard:hover {
@@ -62,7 +73,6 @@
 .popularCard {
   border: 2px solid var(--accent-emerald);
   background: linear-gradient(135deg, var(--bg-card) 0%, rgba(16, 185, 129, 0.05) 100%);
-  transform: scale(1.05);
 }
 
 .popularBadge {
@@ -71,97 +81,96 @@
   right: -32px;
   background: var(--accent-emerald);
   color: white;
-  padding: 6px 40px;
-  font-size: 0.75rem;
+  padding: 4px 40px;
+  font-size: 0.7rem;
   font-weight: 800;
   transform: rotate(45deg);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
-.tierInfo {
+.cardContent {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
 }
 
-.tierName {
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+.bundleIcon {
+  font-size: 1.2rem;
   color: var(--accent-emerald);
+  margin-bottom: 2px;
 }
 
-.tierPriceWrapper {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.currency {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.price {
-  font-size: 3rem;
+.bundleName {
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
-}
-
-.creditsCount {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.featuresList {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  list-style: none;
-  padding: 0;
   margin: 0;
 }
 
-.feature {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.95rem;
-  color: var(--text-secondary);
+.bundleLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.checkIcon {
+.creditsMain {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.creditsNum {
+  font-size: 1.6rem;
+  font-weight: 900;
   color: var(--accent-emerald);
-  flex-shrink: 0;
+}
+
+.creditsText {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.priceContainer {
+  margin-top: 8px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.curr {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.amt {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
 .buyBtn {
   width: 100%;
-  padding: 16px;
-  border-radius: 12px;
+  padding: 10px;
+  border-radius: 8px;
   background: var(--text-primary);
   color: var(--bg-primary);
-  font-weight: 700;
-  font-size: 1rem;
-  transition: opacity 0.2s ease;
-  margin-top: auto;
+  font-weight: 800;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  margin-top: 4px;
 }
 
 .buyBtn:hover {
   opacity: 0.9;
-}
-
-.buyBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  transform: scale(1.02);
 }
 
 .popularBtn {
@@ -174,7 +183,6 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-top: 16px;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }

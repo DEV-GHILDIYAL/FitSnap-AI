@@ -27,12 +27,19 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid cryptographic signature. Transaction Spoofing Prevented." }, { status: 400 });
     }
 
-    // 2. Decode Tier Math (Testing Mode: 1, 2, 3)
+    // 2. Decode Bundle Math (Testing Mode: 1-8 Shop)
     let creditsToAdd = 0;
-    if (amount === 1) creditsToAdd = 20;
-    else if (amount === 2) creditsToAdd = 50;
-    else if (amount === 3) creditsToAdd = 150;
-    else creditsToAdd = Math.floor(amount * 20); // Fallback: 20 per rupee for testing
+    const bundleMap = {
+      1: 15,    // Basic Tip
+      2: 40,    // Starter Pack
+      3: 100,   // Standard Pack
+      4: 250,   // Value Multiplier
+      5: 650,   // Pro Stack
+      6: 1800,  // Elite Bulk
+      7: 4500,  // Master Collection
+      8: 12000  // Unlimited/Enterprise
+    };
+    creditsToAdd = bundleMap[amount] || Math.floor(amount * 1000);
 
     // 3. Atomically Update DynamoDB Live Credits
     await dynamoDb.send(

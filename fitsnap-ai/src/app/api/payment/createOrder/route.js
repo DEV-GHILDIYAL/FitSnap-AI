@@ -13,9 +13,9 @@ export async function POST(request) {
     const body = await request.json();
     const { amount } = body; 
 
-    // Validate valid predefined active tiers (₹99 or ₹199)
-    if (amount !== 99 && amount !== 199) {
-      return NextResponse.json({ error: "Invalid payment tier requested" }, { status: 400 });
+    // Validate valid predefined active bundles (Testing Mode: 1-8)
+    if (amount < 1 || amount > 8) {
+      return NextResponse.json({ error: "Invalid credit bundle requested" }, { status: 400 });
     }
 
     // Initialize Native Razorpay 
