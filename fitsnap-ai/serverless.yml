@@ -13,7 +13,7 @@ provider:
     # instead of treating "run.sh" as a Node.js module import.
     AWS_LAMBDA_EXEC_WRAPPER: /opt/bootstrap
     PORT: 8080
-    AWS_LWA_INVOKE_MODE: response_stream
+    AWS_LWA_INVOKE_MODE: buffered
     # ── Application Environment Variables ──
     REPLICATE_API_TOKEN: ${env:REPLICATE_API_TOKEN, ''}
     CUSTOM_AWS_ACCESS_KEY_ID: ${env:CUSTOM_AWS_ACCESS_KEY_ID, ''}
@@ -33,9 +33,8 @@ functions:
     layers:
       # Official AWS Serverless Web Adapter Layer (v0.8.3, us-east-1 x86_64)
       - arn:aws:lambda:us-east-1:753240598075:layer:LambdaAdapterLayerX86:23
-    # Natively supports response streaming and >30s timeouts
-    url:
-      cors: true
+    events:
+      - httpApi: '*'
 
 package:
   patterns:
