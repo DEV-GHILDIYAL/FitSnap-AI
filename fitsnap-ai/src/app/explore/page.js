@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import styles from "./page.module.css";
 
@@ -45,7 +46,14 @@ export default function ExplorePage() {
         <div className={styles.masonryGrid}>
           {EXPLORE_FEED.map((post) => (
             <div key={post.id} className={styles.postCard}>
-              <img src={post.image} alt="Community Generation" className={styles.image} loading="lazy" />
+              <Image 
+                src={post.image} 
+                alt="Community Generation" 
+                className={styles.image} 
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority={post.id <= 4}
+              />
               
               <div className={styles.overlay}>
                 <div className={styles.statsRow}>

@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import ImageUpload from "@/components/ImageUpload";
 import GenerateButton from "@/components/GenerateButton";
 import ResultSection from "@/components/ResultSection";
-import PresetOutfits from "@/components/PresetOutfits";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useSession } from "next-auth/react";
 import styles from "./page.module.css";
@@ -136,8 +135,6 @@ export default function Home() {
               externalPreview={outfitImage}
               onImageSelect={handleOutfitImage}
             />
-            {/* Built-in quick select purely local to Studio without needing `/catalog` routing */}
-            <PresetOutfits onSelect={(url) => setOutfitImage(url)} />
           </div>
         </div>
 

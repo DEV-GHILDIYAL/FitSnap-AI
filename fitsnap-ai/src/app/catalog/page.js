@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import styles from "./page.module.css";
 
 const GENDERS = ["All", "Men", "Women"];
@@ -84,7 +85,14 @@ export default function CatalogPage() {
           {filteredCatalog.map((item) => (
             <div key={item.id} className={styles.catalogCard}>
               <div className={styles.imageWrapper}>
-                <img src={item.url} alt={item.name} className={styles.image} loading="lazy" />
+                <Image 
+                  src={item.url} 
+                  alt={item.name} 
+                  className={styles.image} 
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  priority={item.id.startsWith('m')} 
+                />
                 <div className={styles.overlay}>
                   <button className={styles.tryBtn} onClick={() => handleTryOn(item.url)}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

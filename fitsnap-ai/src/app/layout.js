@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://fitsnap-ai.vercel.app"), // Replace with your production URL
+  metadataBase: new URL("https://fitsnap.ai"), // Update to your final domain
   title: {
     default: "FitSnap AI – AI-Powered Virtual Try-On & Outfits Preview",
     template: "%s | FitSnap AI"
@@ -31,7 +31,7 @@ export const metadata = {
   openGraph: {
     title: "FitSnap AI – Try Outfits on Yourself Instantly",
     description: "Upload your photo and an outfit to see the magic. Powered by AI virtual try-on technology.",
-    url: "https://fitsnap-ai.vercel.app",
+    url: "https://fitsnap.ai",
     siteName: "FitSnap AI",
     images: [
       {
@@ -77,7 +77,7 @@ const jsonLd = {
   description: "AI-powered virtual try-on platform that lets you see how outfits look on you instantly.",
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Web",
-  url: "https://fitsnap-ai.vercel.app",
+  url: "https://fitsnap.ai",
   offers: {
     "@type": "Offer",
     price: "0",
