@@ -60,7 +60,7 @@ export default function Sidebar() {
       <aside className={`${styles.sidebar} ${mobileOpen ? styles.open : ""}`}>
         <div className={styles.topSection}>
           <div className={styles.logo}>
-            FitSnap <span className={styles.logoAccent}>AI</span>
+            FitSnap <span className={styles.logoAccent}>AI ⚡</span>
           </div>
         </div>
 
