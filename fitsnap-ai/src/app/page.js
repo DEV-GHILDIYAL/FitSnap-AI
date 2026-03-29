@@ -217,26 +217,6 @@ export default function Home() {
           You are out of credits! Please click "My Profile" to upgrade your account.
         </div>
       )}
-
-      {/* Generate */}
-      {(!errorText && status === "authenticated" && (credits === null || credits > 0)) && (
-        <GenerateButton 
-          disabled={!bothReady || credits === 0} 
-          isLoading={isLoading} 
-          onClick={handleGenerate} 
-        />
-      )}
-
-      {/* Result */}
-      <ResultSection resultUrl={resultUrl} userImage={userImage} />
-
-      {/* Persistent History Database */}
-      <WardrobeGallery />
-
-      {/* Footer */}
-      <footer className={styles.footer}>
-        <p>FitSnap AI &middot; Phase 9 &middot; SaaS Dashboard</p>
-      </footer>
     </div>
     </>
   );
