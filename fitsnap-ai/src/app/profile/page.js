@@ -10,33 +10,64 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const isLoadingSession = status === "loading";
   
-  const [credits, setCredits] = useState(null);
+  const [credits, setCredits] = useState(0);
+  const [displayCredits, setDisplayCredits] = useState(0);
+  const [history, setHistory] = useState([]);
   const [loadingCredits, setLoadingCredits] = useState(true);
 
   useEffect(() => {
-    fetchCredits();
+    fetchUserData();
   }, [session]);
 
-  const fetchCredits = () => {
-    if (session?.user) {
-      setLoadingCredits(true);
-      fetch("/api/credits")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.credits !== undefined) setCredits(data.credits);
-        })
-        .catch(console.error)
-        .finally(() => setLoadingCredits(false));
-    } else {
+  const fetchUserData = async () => {
+    if (!session?.user) return;
+    
+    setLoadingCredits(true);
+    try {
+      // Fetch Credits
+      const credRes = await fetch("/api/credits");
+      const credData = await credRes.json();
+      if (credData.credits !== undefined) setCredits(credData.credits);
+
+      // Fetch History for Activity Feed
+      const histRes = await fetch("/api/history");
+      const histData = await histRes.json();
+      setHistory(histData.history?.slice(0, 5) || []);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
       setLoadingCredits(false);
     }
   };
 
+  // Animation logic for Credit Counter
+  useEffect(() => {
+    if (credits > 0) {
+      let start = 0;
+      const end = credits;
+      const duration = 1000;
+      const increment = end / (duration / 16);
+      
+      const timer = setInterval(() => {
+        start += increment;
+        if (start >= end) {
+          setDisplayCredits(end);
+          clearInterval(timer);
+        } else {
+          setDisplayCredits(Math.floor(start));
+        }
+      }, 16);
+      return () => clearInterval(timer);
+    } else {
+      setDisplayCredits(0);
+    }
+  }, [credits]);
+
   const handlePayment = async (amount) => {
-    if (!session) return alert("Must be logged in");
+    if (!session) return;
 
     try {
-      // Step 1: Initialize transaction tracking on backend
       const res = await fetch("/api/payment/createOrder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,21 +75,14 @@ export default function ProfilePage() {
       });
       const order = await res.json();
       
-      if (order.error) {
-        alert(order.error);
-        return;
-      }
-
-      // Step 2: Configure UI Overlay directly mapping backend encryption hashes
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholderkeyid", // Expose publicly or provide default test hook
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: "FitSnap AI credits",
         description: `Purchasing ${amount === 99 ? 20 : 50} Premium Credits`,
         order_id: order.id,
         handler: async function (response) {
-            // Step 3: Secret verification checking signature hashes validating authenticity
             const verifyRes = await fetch("/api/payment/verify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -72,18 +96,11 @@ export default function ProfilePage() {
             
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-                alert(`Transaction verified natively by Stripe/Razorpay! ${amount === 99 ? 20 : 50} Credits Deposited!`);
-                fetchCredits(); // Force live UI update reflecting atomic database increment
-            } else {
-                alert("Security block: Unable to authenticate Webhook Hash from remote endpoint.");
+                fetchUserData(); 
             }
         },
-        prefill: {
-            email: session.user.email,
-        },
-        theme: {
-            color: "#1a1a1a",
-        },
+        prefill: { email: session.user.email },
+        theme: { color: "#1e293b" },
       };
 
       const paymentObject = new window.Razorpay(options);
@@ -91,17 +108,15 @@ export default function ProfilePage() {
 
     } catch (error) {
       console.error(error);
-      alert("Payment gateway failed to load. Is checkout.js script active?");
     }
   };
 
-  // Handle unauthenticated logic gracefully directly
   if (!isLoadingSession && !session) {
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>My Profile</h1>
-          <p className={styles.subtitle}>Please login via the Sidebar to view your account details.</p>
+        <div className={styles.lockedState}>
+          <h2>🔒 Access Restricted</h2>
+          <p>Please log in to manage your premium fashion profile.</p>
         </div>
       </div>
     );
@@ -113,55 +128,79 @@ export default function ProfilePage() {
       <LoadingOverlay isVisible={isLoadingSession} />
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>My Profile</h1>
-          <p className={styles.subtitle}>Manage your FitSnap AI account and credit balance.</p>
+          <h1 className={styles.title}>Member Studio</h1>
+          <p className={styles.subtitle}>Your personalized fashion HQ & credit management.</p>
         </div>
 
         <div className={styles.contentGrid}>
-          {/* Account Overview */}
-          <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Account Overview</h2>
-            <div className={styles.infoRow}>
-              <span className={styles.infoLabel}>Email</span>
-              <span className={styles.infoValue}>{session?.user?.email}</span>
+          {/* Left: Premium Member Card */}
+          <section className={styles.memberCard}>
+            <div className={styles.cardDecor} />
+            <div className={styles.cardHeader}>
+              <div className={styles.chip} />
+              <span className={styles.memberType}>Gold Member</span>
             </div>
-            <div className={styles.infoRow}>
-              <span className={styles.infoLabel}>Available Credits</span>
-              <span className={styles.creditsValue}>
-                {loadingCredits ? "..." : credits} ✨
+            
+            <div className={styles.creditDisplay}>
+              <span className={styles.creditValue}>
+                {loadingCredits ? "..." : displayCredits}
               </span>
+              <span className={styles.creditLabel}>Available Search Credits</span>
+            </div>
+
+            <div className={styles.email}>
+              {session?.user?.email}
             </div>
           </section>
 
-          {/* Buy Credits Mockup */}
-          <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Buy Credits</h2>
-            <p className={styles.buyDescription}>
-              Need more virtual try-ons? Top up your account balance instantly.
-            </p>
-
-            <div className={styles.pricingGrid}>
-              <div className={styles.pricingTier}>
-                <div className={styles.tierHeader}>
-                  <span className={styles.tierCredits}>20 Credits</span>
-                  <span className={styles.tierPrice}>₹99</span>
+          {/* Right: Actions & Activity */}
+          <div className={styles.mainContent}>
+            <section className={styles.card}>
+              <h2 className={styles.cardTitle}>Top Up Credits</h2>
+              <div className={styles.pricingGrid}>
+                <div className={styles.pricingTier}>
+                  <div className={styles.tierHeader}>
+                    <span className={styles.tierCredits}>20 Credits</span>
+                    <span className={styles.tierPrice}>₹99</span>
+                  </div>
+                  <button className={styles.buyBtn} onClick={() => handlePayment(99)}>Purchase</button>
                 </div>
-                <button className={styles.buyBtn} onClick={() => handlePayment(99)}>
-                  Purchase
-                </button>
-              </div>
-
-              <div className={`${styles.pricingTier} ${styles.popularTier}`}>
-                <div className={styles.tierHeader}>
-                  <span className={styles.tierCredits}>50 Credits</span>
-                  <span className={styles.tierPrice}>₹199</span>
+                <div className={`${styles.pricingTier} ${styles.popularTier}`}>
+                  <div className={styles.tierHeader}>
+                    <span className={styles.tierCredits}>50 Credits</span>
+                    <span className={styles.tierPrice}>₹199</span>
+                  </div>
+                  <button className={`${styles.buyBtn} ${styles.popularBtn}`} onClick={() => handlePayment(199)}>Get Popular Bundle</button>
                 </div>
-                <button className={`${styles.buyBtn} ${styles.popularBtn}`} onClick={() => handlePayment(199)}>
-                  Purchase High Value
-                </button>
               </div>
-            </div>
-          </section>
+            </section>
+
+            <section className={styles.card}>
+              <h2 className={styles.cardTitle}>Recent Activity</h2>
+              <table className={styles.activityTable}>
+                <thead>
+                  <tr>
+                    <th>Action</th>
+                    <th>Ref ID</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.length > 0 ? history.map((item, idx) => (
+                    <tr key={idx}>
+                      <td>AI Generation</td>
+                      <td>#{item.timestamp?.toString().slice(-6) || "FIT-"+idx}</td>
+                      <td className={styles.statusSuccess}>Completed</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: "center", color: "var(--text-muted)" }}>No recent activity to show.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </section>
+          </div>
         </div>
       </div>
     </>

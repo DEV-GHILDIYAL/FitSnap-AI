@@ -1,107 +1,140 @@
 .container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xl);
-  max-width: 900px;
+  padding: 40px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-3xl) var(--space-xl);
-  min-height: 100vh;
-  animation: fadeInUp 0.5s var(--transition-normal);
 }
 
 .header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
+  margin-bottom: 48px;
+  animation: fadeInDown 0.6s ease;
 }
 
 .title {
-  font-size: 2.25rem;
+  font-size: 2.8rem;
   font-weight: 800;
+  letter-spacing: -0.04em;
   color: var(--text-primary);
-  letter-spacing: -0.03em;
+  margin-bottom: 8px;
 }
 
 .subtitle {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--text-secondary);
 }
 
 .contentGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-xl);
+  grid-template-columns: 380px 1fr;
+  gap: 32px;
+  align-items: start;
 }
 
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl);
-  box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.cardTitle {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: var(--space-sm);
-  letter-spacing: -0.01em;
+/* Membership Card Style */
+.memberCard {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 32px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.infoRow {
+.cardDecor {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+  filter: blur(20px);
+}
+
+.cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-xs) 0;
+  margin-bottom: 40px;
 }
 
-.infoLabel {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+.chip {
+  width: 45px;
+  height: 32px;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  border-radius: 6px;
 }
 
-.infoValue {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.creditsValue {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--accent-emerald);
-  background: rgba(16, 185, 129, 0.1);
+.memberType {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: rgba(255, 255, 255, 0.1);
   padding: 4px 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 99px;
 }
 
-.buyDescription {
+.creditDisplay {
+  margin-top: 24px;
+}
+
+.creditValue {
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(to bottom, #ffffff, #94a3b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.creditLabel {
+  display: block;
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.email {
+  margin-top: 40px;
+  font-family: monospace;
   font-size: 0.95rem;
-  color: var(--text-secondary);
+  color: #64748b;
+}
+
+/* Right Section Cards */
+.card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+.cardTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text-primary);
 }
 
 .pricingGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
-}
-
-@media (max-width: 640px) {
-  .pricingGrid {
-    grid-template-columns: 1fr;
-  }
+  gap: 20px;
 }
 
 .pricingTier {
   background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
   padding: var(--space-lg);
   display: flex;
   flex-direction: column;

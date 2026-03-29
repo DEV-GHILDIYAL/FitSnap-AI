@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import styles from "./LoadingOverlay.module.css";
 
 const MESSAGES = [
-  "Analyzing your outfit...",
-  "Fitting clothes...",
-  "Applying lighting...",
-  "Generating realistic result...",
-  "Almost there...",
+  "🔍 Analyzing body proportions...",
+  "👗 Extracting garment textures...",
+  "🧠 Synthesizing AI fabric drape...",
+  "🧪 Calibrating lighting and shadows...",
+  "✨ Finalizing your virtual look...",
 ];
 
 export default function LoadingOverlay({ isVisible }) {
