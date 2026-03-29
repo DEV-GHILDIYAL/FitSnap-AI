@@ -133,48 +133,58 @@ export default function ProfilePage() {
         </div>
 
         <div className={styles.contentGrid}>
-          {/* Left: Premium Member Card */}
-          <section className={styles.memberCard}>
-            <div className={styles.cardDecor} />
-            <div className={styles.cardHeader}>
-              <div className={styles.chip} />
-              <span className={styles.memberType}>Gold Member</span>
-            </div>
-            
-            <div className={styles.creditDisplay}>
-              <span className={styles.creditValue}>
-                {loadingCredits ? "..." : displayCredits}
-              </span>
-              <span className={styles.creditLabel}>Available Search Credits</span>
-            </div>
-
-            <div className={styles.email}>
-              {session?.user?.email}
-            </div>
-          </section>
-
-          {/* Right: Actions & Activity */}
-          <div className={styles.mainContent}>
-            <section className={styles.card}>
-              <h2 className={styles.cardTitle}>Top Up Credits</h2>
-              <div className={styles.pricingGrid}>
-                <div className={styles.pricingTier}>
-                  <div className={styles.tierHeader}>
-                    <span className={styles.tierCredits}>20 Credits</span>
-                    <span className={styles.tierPrice}>₹99</span>
-                  </div>
-                  <button className={styles.buyBtn} onClick={() => handlePayment(99)}>Purchase</button>
-                </div>
-                <div className={`${styles.pricingTier} ${styles.popularTier}`}>
-                  <div className={styles.tierHeader}>
-                    <span className={styles.tierCredits}>50 Credits</span>
-                    <span className={styles.tierPrice}>₹199</span>
-                  </div>
-                  <button className={`${styles.buyBtn} ${styles.popularBtn}`} onClick={() => handlePayment(199)}>Get Popular Bundle</button>
-                </div>
+          {/* Top: Profile Info Header */}
+          <div className={styles.profileHeader}>
+            <div className={styles.avatarWrapper}>
+              <div className={styles.avatar}>
+                {session?.user?.email?.[0].toUpperCase() || "F"}
               </div>
-            </section>
+            </div>
+            <div className={styles.profileInfo}>
+              <h2>{session?.user?.name || "Premium Member"}</h2>
+              <div className={styles.profileEmail}>{session?.user?.email}</div>
+            </div>
+          </div>
 
+          <div className={styles.dashboardGrid}>
+            {/* Left: Premium Member Card & Top Up */}
+            <div className={styles.sideContent}>
+              <section className={styles.memberCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.chip} />
+                  <span className={styles.memberType}>Gold Member</span>
+                </div>
+                
+                <div className={styles.creditDisplay}>
+                  <div className={styles.creditValue}>
+                    {loadingCredits ? "..." : displayCredits}
+                  </div>
+                  <span className={styles.creditLabel}>Total Generation Credits</span>
+                </div>
+              </section>
+
+              <section className={styles.card} style={{ marginTop: "24px" }}>
+                <h2 className={styles.cardTitle}>Top Up Credits</h2>
+                <div className={styles.pricingGrid}>
+                  <div className={styles.pricingTier}>
+                    <div className={styles.tierHeader}>
+                      <span className={styles.tierCredits}>20 Credits</span>
+                      <span className={styles.tierPrice}>₹99</span>
+                    </div>
+                    <button className={styles.buyBtn} onClick={() => handlePayment(99)}>Purchase</button>
+                  </div>
+                  <div className={`${styles.pricingTier} ${styles.popularTier}`}>
+                    <div className={styles.tierHeader}>
+                      <span className={styles.tierCredits}>50 Credits</span>
+                      <span className={styles.tierPrice}>₹199</span>
+                    </div>
+                    <button className={`${styles.buyBtn} ${styles.popularBtn}`} onClick={() => handlePayment(199)}>Get Popular Bundle</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            {/* Right: Activity Feed */}
             <section className={styles.card}>
               <h2 className={styles.cardTitle}>Recent Activity</h2>
               <table className={styles.activityTable}>
@@ -190,11 +200,11 @@ export default function ProfilePage() {
                     <tr key={idx}>
                       <td>AI Generation</td>
                       <td>#{item.timestamp?.toString().slice(-6) || "FIT-"+idx}</td>
-                      <td className={styles.statusSuccess}>Completed</td>
+                      <td><span className={styles.statusSuccess}>Completed</span></td>
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan="3" style={{ textAlign: "center", color: "var(--text-muted)" }}>No recent activity to show.</td>
+                      <td colSpan="3" style={{ textAlign: "center", color: "var(--text-muted)", padding: "40px" }}>No recent activity to show.</td>
                     </tr>
                   )}
                 </tbody>

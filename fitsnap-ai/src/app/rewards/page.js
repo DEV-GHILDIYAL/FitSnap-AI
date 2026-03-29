@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import styles from "./page.module.css";
@@ -9,10 +9,18 @@ export default function RewardsPage() {
   const { data: session, status } = useSession();
   const isLoadingSession = status === "loading";
   const [copied, setCopied] = useState(false);
+  const [baseUrl, setBaseUrl] = useState("https://fitsnap.ai");
+
+  // capture current origin for dynamic link
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
 
   // Generate a dummy referral link dynamically based on session or fallback
   const fallbackCode = "FT-AI-WINR";
-  const referralLink = `https://fitsnap.ai/invite/${session?.user?.email?.split('@')[0] || fallbackCode}`;
+  const referralLink = `${baseUrl}/invite/${session?.user?.email?.split('@')[0] || fallbackCode}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
