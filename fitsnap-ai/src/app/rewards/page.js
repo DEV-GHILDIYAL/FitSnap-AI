@@ -100,14 +100,10 @@ export default function RewardsPage() {
           </div>
         </div>
 
-        <div className={styles.statisticsBlock}>
+        <div className={styles.statisticsBlock} style={{ opacity: 0.6, pointerEvents: 'none' }}>
           <div className={styles.statBox}>
-            <p className={styles.statNumber}>0</p>
-            <p className={styles.statLabel}>Friends Invited</p>
-          </div>
-          <div className={styles.statBox}>
-            <p className={styles.statNumber}>0</p>
-            <p className={styles.statLabel}>Credits Earned</p>
+            <p className={styles.statNumber}>-</p>
+            <p className={styles.statLabel}>Referral tracking coming soon</p>
           </div>
         </div>
       </div>

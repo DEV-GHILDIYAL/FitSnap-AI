@@ -12,7 +12,7 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handlePayment = async (amount) => {
+  const handlePayment = async (amount, bundle) => {
     if (!session) {
       router.push("/api/auth/signin");
       return;
@@ -32,7 +32,7 @@ export default function PricingPage() {
         amount: order.amount,
         currency: order.currency,
         name: "FitSnap Credit Shop ⚡",
-        description: `Purchasing ${bundle.credits}`,
+        description: `Purchasing ${bundle.credits} Credits`,
         order_id: order.id,
         handler: async function (response) {
             const verifyRes = await fetch("/api/payment/verify", {
@@ -66,14 +66,14 @@ export default function PricingPage() {
   };
 
   const bundles = [
-    { id: 1, name: "Micro Pack", price: "1", credits: "15", label: "Quick Start" },
-    { id: 2, name: "Starter Kit", price: "2", credits: "40", label: "Beginner Choice" },
-    { id: 3, name: "Standard", price: "3", credits: "100", label: "Regular User" },
-    { id: 4, name: "Value Pack", price: "4", credits: "250", label: "Best Value", popular: true },
-    { id: 5, name: "Pro Stack", price: "5", credits: "650", label: "Creator Choice" },
-    { id: 6, name: "Elite Bulk", price: "6", credits: "1,800", label: "Professional" },
-    { id: 7, name: "Master Set", price: "7", credits: "4,500", label: "Hardcore Set" },
-    { id: 8, name: "Unlimited", price: "8", credits: "12,000", label: "Enterprise" },
+    { id: 1, name: "Micro Pack", price: "49", credits: "10", label: "Quick Start" },
+    { id: 2, name: "Starter Kit", price: "99", credits: "25", label: "Beginner Choice" },
+    { id: 3, name: "Standard", price: "199", credits: "60", label: "Regular User" },
+    { id: 4, name: "Value Pack", price: "449", credits: "150", label: "Best Value", popular: true },
+    { id: 5, name: "Pro Stack", price: "999", credits: "350", label: "Creator Choice" },
+    { id: 6, name: "Elite Bulk", price: "2199", credits: "800", label: "Professional" },
+    { id: 7, name: "Master Set", price: "4999", credits: "2,000", label: "Hardcore Set" },
+    { id: 8, name: "Enterprise", price: "11999", credits: "5,000", label: "Enterprise" },
   ];
 
   return (
@@ -82,7 +82,7 @@ export default function PricingPage() {
       <LoadingOverlay isVisible={loading} />
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>FitSnap Credit Shop ⚡</h1>
+          <h1 className={styles.title}>Supercharge Your Wardrobe ⚡</h1>
           <p className={styles.subtitle}>Supercharge your wardrobe with high-speed AI generations.</p>
         </div>
 
@@ -109,7 +109,7 @@ export default function PricingPage() {
 
               <button 
                 className={`${styles.buyBtn} ${bundle.popular ? styles.popularBtn : ""}`}
-                onClick={() => handlePayment(parseInt(bundle.price))}
+                onClick={() => handlePayment(parseInt(bundle.price), bundle)}
               >
                 Purchase
               </button>

@@ -27,19 +27,19 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid cryptographic signature. Transaction Spoofing Prevented." }, { status: 400 });
     }
 
-    // 2. Decode Bundle Math (Testing Mode: 1-8 Shop)
+    // 2. Decode Bundle Math (Commercial Production Mode)
     let creditsToAdd = 0;
     const bundleMap = {
-      1: 15,    // Basic Tip
-      2: 40,    // Starter Pack
-      3: 100,   // Standard Pack
-      4: 250,   // Value Multiplier
-      5: 650,   // Pro Stack
-      6: 1800,  // Elite Bulk
-      7: 4500,  // Master Collection
-      8: 12000  // Unlimited/Enterprise
+      49: 10,       // Micro
+      99: 25,       // Starter
+      199: 60,      // Standard
+      449: 150,     // Value Multiplier
+      999: 350,     // Pro Stack
+      2199: 800,    // Elite Bulk
+      4999: 2000,   // Master Collection
+      11999: 5000   // Enterprise Bulk
     };
-    creditsToAdd = bundleMap[amount] || Math.floor(amount * 1000);
+    creditsToAdd = bundleMap[amount] || Math.floor(amount / 3); // Conservative fallback for manual adjustments
 
     // 3. Atomically Update DynamoDB Live Credits
     await dynamoDb.send(

@@ -13,8 +13,9 @@ export async function POST(request) {
     const body = await request.json();
     const { amount } = body; 
 
-    // Validate valid predefined active bundles (Testing Mode: 1-8)
-    if (amount < 1 || amount > 8) {
+    // Validate valid predefined commercial bundles (₹49 to ₹11999)
+    const validPrices = [49, 99, 199, 449, 999, 2199, 4999, 11999];
+    if (!validPrices.includes(amount)) {
       return NextResponse.json({ error: "Invalid credit bundle requested" }, { status: 400 });
     }
 

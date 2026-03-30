@@ -53,18 +53,10 @@ export async function POST(request) {
 
     const creditCost = mode === "pro" ? 2 : 1;
 
-    // --- Validate DynamoDB Credits ---
-    const userRecord = await dynamoDb.send(
-      new GetCommand({
-        TableName: "users",
-        Key: { userId },
-      })
-    );
-
-    const currentBalance = userRecord.Item ? userRecord.Item.credits : 0;
-
-    if (currentBalance < creditCost) {
-      return NextResponse.json({ error: `Not enough credits. ${mode === 'pro' ? 'Pro mode requires 2 credits.' : 'Requires 1 credit.'}` }, { status: 403 });
+    // --- 1. Payload Size Validation (Security) ---
+    // Approximate base64 size check (limit to ~5MB)
+    if (userImage?.length > 7000000 || outfitImage?.length > 7000000) {
+      return NextResponse.json({ error: "Image too large. Max size 5MB." }, { status: 413 });
     }
 
     if (!userImage || !outfitImage) {
@@ -72,6 +64,29 @@ export async function POST(request) {
         { error: "Both userImage and outfitImage are required." },
         { status: 400 }
       );
+    }
+
+    // --- 2. Atomic Credit Reservation (Anti-Hack) ---
+    // We attempt to decrement credits BEFORE calling the model.
+    // This prevents race conditions where a user spams requests.
+    try {
+      await dynamoDb.send(
+        new UpdateCommand({
+          TableName: "users",
+          Key: { userId },
+          UpdateExpression: "SET credits = credits - :cost",
+          ConditionExpression: "credits >= :cost",
+          ExpressionAttributeValues: {
+            ":cost": creditCost,
+          },
+          ReturnValues: "UPDATED_NEW",
+        })
+      );
+    } catch (dbErr) {
+      if (dbErr.name === "ConditionalCheckFailedException") {
+        return NextResponse.json({ error: `Insufficient Credits. ${mode === 'pro' ? 'Pro mode requires 2.' : 'Requires 1 credit.'}` }, { status: 403 });
+      }
+      throw dbErr; // Rethrow other DB errors to general catch
     }
 
     // --- Call Replicate ---
@@ -138,18 +153,7 @@ export async function POST(request) {
 
     console.info(JSON.stringify({ event: "generation_success", outputUrl: publicS3Url, timestamp: new Date().toISOString() }));
     
-    // --- Decrement credits based on usage tier ---
-    const updatedUser = await dynamoDb.send(
-      new UpdateCommand({
-        TableName: "users",
-        Key: { userId },
-        UpdateExpression: "SET credits = credits - :cost",
-        ExpressionAttributeValues: {
-          ":cost": creditCost,
-        },
-        ReturnValues: "UPDATED_NEW",
-      })
-    );
+    // --- Log Output to History Gallery ---
 
     // --- Log Output to History Gallery ---
     try {
