@@ -1,104 +1,172 @@
 .section {
   width: 100%;
-  animation: fadeInUp 0.7s var(--transition-normal) backwards;
-}
-
-.container {
+  margin-top: 60px;
+  animation: fadeInUp 1s var(--transition-normal) backwards;
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
   align-items: center;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
+  gap: 32px;
 }
 
 .header {
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
-  text-align: center;
+  gap: 8px;
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.75rem;
+  font-weight: 900;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
 }
 
-.subtitle {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+.card {
+  width: 100%;
+  max-width: 800px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 32px;
+  padding: 24px;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.2);
 }
 
-.imageWrapper {
+.imageContainer {
   position: relative;
   width: 100%;
-  aspect-ratio: 3/4;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  aspect-ratio: 4/5;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  cursor: ew-resize;
+  background: #000;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
-.image {
+.imageBase, .imageOver {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform var(--transition-slow);
+  object-fit: contain;
+  pointer-events: none;
 }
 
-.imageWrapper:hover .image {
-  transform: scale(1.02);
-}
-
-/* --- Sharing & Actions --- */
-.actionGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
-.actionBtn {
+/* Slider Visual Elements */
+.sliderLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: white;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sliderHandle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  background: #6366f1;
+  border: 4px solid white;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  padding: 12px 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  color: white;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.downloadBtn {
-  background: var(--bg-secondary);
+.activeHandle {
+  transform: translate(-50%, -50%) scale(1.15);
+  background: #4f46e5;
+}
+
+.sliderInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: ew-resize;
+  z-index: 20;
+}
+
+/* --- Actions --- */
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+  .actions {
+    flex-direction: column;
+  }
+}
+
+.actions button {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.btnPrimary {
+  background: #6366f1;
+  color: white;
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+}
+
+.btnPrimary:hover {
+  background: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3);
+}
+
+.btnSecondary {
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
 }
 
-.downloadBtn:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--accent-color);
+.btnSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--text-primary);
 }
 
-.shareBtn {
-  background: var(--accent-color);
-  color: var(--bg-primary);
-  border: 1px solid var(--accent-color);
-}
-
-.shareBtn:hover {
-  background: var(--accent-color-hover);
-  transform: translateY(-1px);
-}
-
-.shareBtn.copied {
-  background: var(--accent-emerald);
-  border-color: var(--accent-emerald);
+.btnWhatsApp {
+  background: #25d366;
   color: white;
+  box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
 }
+
+.btnWhatsApp:hover {
+  background: #128c7e;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(37, 211, 102, 0.3);
+}
+

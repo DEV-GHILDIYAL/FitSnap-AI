@@ -6,6 +6,7 @@ import ImageUpload from "@/components/ImageUpload";
 import GenerateButton from "@/components/GenerateButton";
 import ResultSection from "@/components/ResultSection";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import PersonaStudio from "@/components/PersonaStudio/PersonaStudio";
 import { useSession } from "next-auth/react";
 import styles from "./page.module.css";
 
@@ -28,14 +29,29 @@ function CatalogHydrator({ setOutfitImage }) {
   return null;
 }
 
+const QUICK_PRESETS = [
+  { id: "p1", name: "Classic White Tee", category: "top", url: "/presets/white_tee.png" },
+  { id: "p2", name: "Leather Jacket", category: "top", url: "/presets/leather_jacket.png" },
+  { id: "p3", name: "Summer Floral", category: "full", url: "/presets/summer_dress.png" },
+  { id: "p4", name: "Formal Blazer", category: "top", url: "/presets/navy_suit.png" },
+  { id: "p5", name: "Blue Jeans", category: "bottom", url: "/presets/blue_jeans.png" },
+];
+
+import { uploadToS3, triggerGeneration, pollStatus } from "@/lib/v2_client_helper";
+
 export default function Home() {
   const [userImage, setUserImage] = useState(null);
+  const [userFile, setUserFile] = useState(null);
   const [outfitImage, setOutfitImage] = useState(null);
+  const [outfitFile, setOutfitFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState("");
   const [resultUrl, setResultUrl] = useState(null);
   const [errorText, setErrorText] = useState("");
   const [credits, setCredits] = useState(null);
   const [generationMode, setGenerationMode] = useState("fast"); // "fast" | "pro"
+  const [gender, setGender] = useState("female");
+  const [category, setCategory] = useState("top");
 
   const { data: session, status } = useSession();
 
@@ -53,12 +69,19 @@ export default function Home() {
     }
   }, [session, resultUrl]); // Refetch credits automatically whenever generation succeeds
 
-  const handleUserImage = useCallback((_file, dataUrl) => {
+  const handleUserImage = useCallback((file, dataUrl) => {
     setUserImage(dataUrl);
+    setUserFile(file);
   }, []);
 
-  const handleOutfitImage = useCallback((_file, dataUrl) => {
+  const handleOutfitImage = useCallback((file, dataUrl) => {
     setOutfitImage(dataUrl);
+    setOutfitFile(file);
+  }, []);
+
+  const handleMannequinSelect = useCallback((dataUrl) => {
+    setUserImage(dataUrl);
+    setUserFile(null); // It's a preset URL, not a new file
   }, []);
 
   const bothReady = !!userImage && !!outfitImage;
@@ -67,23 +90,38 @@ export default function Home() {
     setErrorText("");
     setResultUrl(null);
     setIsLoading(true);
+    setLoadingStatus("Preparing Studio...");
     
     try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userImage, outfitImage, mode: generationMode }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to generate outfit");
+      // 1. Upload Human Photo (if it's a new local file)
+      let finalUserDataUrl = userImage;
+      if (userFile) {
+        setLoadingStatus("Uploading Your Photo...");
+        const { publicUrl } = await uploadToS3(userFile);
+        finalUserDataUrl = publicUrl;
       }
-      
-      setResultUrl(data.resultUrl);
-      
-      // Note: State credits refresh naturally via useEffect watching resultUrl
+
+      // 2. Upload Outfit Photo (if it's a new local file)
+      let finalOutfitDataUrl = outfitImage;
+      if (outfitFile) {
+        setLoadingStatus("Uploading The Outfit...");
+        const { publicUrl } = await uploadToS3(outfitFile);
+        finalOutfitDataUrl = publicUrl;
+      }
+
+      // 3. Trigger Async Generation
+      setLoadingStatus("Waking up AI Artisans...");
+      const requestId = await triggerGeneration(finalUserDataUrl, finalOutfitDataUrl, category);
+
+      // 4. Poll for Result
+      setLoadingStatus("Synthesizing your look...");
+      const finalResult = await pollStatus(requestId, (update) => {
+        if (update.status === "PROCESSING") {
+          setLoadingStatus("AI is stitching the fabric...");
+        }
+      });
+
+      setResultUrl(finalResult);
       
       // Scroll to bottom to show result
       setTimeout(() => {
@@ -94,6 +132,7 @@ export default function Home() {
       setErrorText(err.message);
     } finally {
       setIsLoading(false);
+      setLoadingStatus("");
     }
   };
 
@@ -102,66 +141,126 @@ export default function Home() {
       <Suspense fallback={null}>
         <CatalogHydrator setOutfitImage={setOutfitImage} />
       </Suspense>
-      <LoadingOverlay isVisible={isLoading} />
+      <LoadingOverlay isVisible={isLoading} message={loadingStatus} />
       <div className={styles.main}>
-      {/* Hero */}
-      <header className={styles.hero}>
-        <div className={styles.badge}>✨ AI-Powered Virtual Try-On</div>
-        <h1 className={styles.title}>
-          FitSnap <span className={styles.titleAccent}>AI</span>
-        </h1>
-        <p className={styles.subtitle}>
-          Try Outfits on Yourself – Upload your photo and an outfit to see the magic.
-        </p>
-      </header>
+        <div className={styles.studioContainer}>
+          {/* Hero */}
+          <header className={styles.hero}>
+            <div className={styles.badge}>✨ Next-Gen AI Virtual Salon</div>
+            <h1 className={styles.title}>
+              FitSnap <span className={styles.titleAccent}>Studio</span>
+            </h1>
+            <p className={styles.subtitle}>
+              The ultimate AI dressing room — personalized to your style, gender, and fit.
+            </p>
+          </header>
 
-      {/* Upload & Setup Section */}
-      <section className={styles.uploadSection}>
-        <div className={styles.uploadGrid}>
-          <ImageUpload
-            label="1. Your Face"
-            description="Front-facing, clear light"
-            icon="👤"
-            externalPreview={userImage}
-            onImageSelect={handleUserImage}
+          {/* Step Flow Indicators */}
+          <div className={styles.stepFlow}>
+            <div className={`${styles.step} ${styles.stepActive}`}>
+              <div className={styles.stepIcon}>1</div>
+              <span className={styles.stepLabel}>Setup</span>
+            </div>
+            <div className={styles.stepDivider} />
+            <div className={`${styles.step} ${userImage ? styles.stepActive : ""}`}>
+              <div className={styles.stepIcon}>2</div>
+              <span className={styles.stepLabel}>Upload</span>
+            </div>
+            <div className={styles.stepDivider} />
+            <div className={`${styles.step} ${bothReady ? styles.stepActive : ""}`}>
+              <div className={styles.stepIcon}>3</div>
+              <span className={styles.stepLabel}>Style</span>
+            </div>
+            <div className={styles.stepDivider} />
+            <div className={`${styles.step} ${resultUrl ? styles.stepActive : ""}`}>
+              <div className={styles.stepIcon}>4</div>
+              <span className={styles.stepLabel}>Magic</span>
+            </div>
+          </div>
+
+          {/* Persona Studio – Gender, Mannequin, Category */}
+          <PersonaStudio
+            gender={gender}
+            setGender={setGender}
+            category={category}
+            setCategory={setCategory}
+            onMannequinSelect={handleMannequinSelect}
           />
 
-          {/* Outfit upload has preset logic injected */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <ImageUpload
-              label="2. The Outfit"
-              description="Flat lay or model photo"
-              icon="👗"
-              externalPreview={outfitImage}
-              onImageSelect={handleOutfitImage}
-            />
-          </div>
-        </div>
+          {/* Upload Section */}
+          <section className={styles.uploadSection}>
+            <div className={styles.uploadGrid}>
+              <ImageUpload
+                label="Your Photo"
+                description="Clear front-facing photo (or use mannequin above)"
+                icon="👤"
+                externalPreview={userImage}
+                onImageSelect={handleUserImage}
+              />
 
-        {/* AI Selection Toggle */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-          <div className={styles.modeToggleWrapper}>
-            <button 
-              className={`${styles.modeToggleBtn} ${generationMode === 'fast' ? styles.modeToggleActive : ''}`}
-              onClick={() => setGenerationMode('fast')}
-            >
-              ⚡ Fast (1 Credit)
-            </button>
-            <button 
-              className={`${styles.modeToggleBtn} ${generationMode === 'pro' ? styles.modeToggleActive : ''}`}
-              onClick={() => setGenerationMode('pro')}
-            >
-              ✨ Pro HD (2 Credits)
-            </button>
-          </div>
-        </div>
-      </section>
+              <ImageUpload
+                label="The Outfit"
+                description={category === 'top' ? 'Upload a top/shirt' : category === 'bottom' ? 'Upload pants/skirt' : 'Upload a full outfit/dress'}
+                icon={category === 'top' ? '👕' : category === 'bottom' ? '👖' : '👗'}
+                externalPreview={outfitImage}
+                onImageSelect={handleOutfitImage}
+              />
+            </div>
 
-      <GenerateButton
-        onClick={handleGenerate}
-        disabled={!bothReady || isLoading}
-        isLoading={isLoading}
-      />
+            {/* Quick Try Presets */}
+            <div className={styles.presetsContainer}>
+              <div className={styles.presetsHeader}>
+                <h4 className={styles.presetsTitle}>Quick Try Catalog</h4>
+                <span className={styles.presetsBadge}>New</span>
+              </div>
+              <div className={styles.presetsList}>
+                {QUICK_PRESETS.map((preset) => (
+                  <div 
+                    key={preset.id} 
+                    className={styles.presetCard}
+                    onClick={() => {
+                      setCategory(preset.category);
+                      setOutfitImage(preset.url);
+                    }}
+                  >
+                    <img src={preset.url} alt={preset.name} className={styles.presetImg} />
+                    <div className={styles.presetOverlay}>
+                      <span className={styles.presetLabel}>{preset.name}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* AI Quality Toggle */}
+            <div className={styles.modeSelectContainer}>
+              <button 
+                className={`${styles.modeToggleBtn} ${generationMode === 'fast' ? styles.modeToggleActive : ''}`}
+                onClick={() => setGenerationMode('fast')}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                Fast (1 Credit)
+              </button>
+              <button 
+                className={`${styles.modeToggleBtn} ${generationMode === 'pro' ? styles.modeToggleActive : ''}`}
+                onClick={() => setGenerationMode('pro')}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                </svg>
+                Pro HD (2 Credits)
+              </button>
+            </div>
+          </section>
+
+          <GenerateButton
+            onClick={handleGenerate}
+            disabled={!bothReady || isLoading}
+            isLoading={isLoading}
+          />
+        </div>
 
       {errorText && (
         <div className={styles.errorBanner}>

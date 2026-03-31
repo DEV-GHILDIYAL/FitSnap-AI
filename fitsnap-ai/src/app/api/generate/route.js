@@ -1,20 +1,10 @@
-import Replicate from "replicate";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { GetCommand, UpdateCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoDb } from "@/lib/dynamodb";
-
-// Ensure AWS SDK forces usage of these environment variables natively or explicitly
-const s3Client = new S3Client({
-  region: process.env.CUSTOM_AWS_REGION || process.env.AWS_REGION || "us-east-1",
-  credentials: {
-    // Prefix custom so standard Lambda STS doesn't overshadow it
-    accessKeyId: process.env.CUSTOM_AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.CUSTOM_AWS_SECRET_ACCESS_KEY || "",
-  },
-});
+import Replicate from "replicate";
+import crypto from "crypto";
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
@@ -22,178 +12,86 @@ const replicate = new Replicate({
 
 const MODEL = "cuuupid/idm-vton:e3893af4fb4bd5741752b35b395348c5f7a9ab5c4776264f5d38e41418081ed7";
 
-/**
- * POST /api/generate
- *
- * Accepts a JSON body with base64-encoded images:
- *   { userImage: "data:image/...;base64,...", outfitImage: "data:image/...;base64,..." }
- *
- * Calls the Replicate IDM-VTON model and returns the generated image URL.
- */
 export async function POST(request) {
   try {
-    // --- Validate API token ---
-    if (!process.env.REPLICATE_API_TOKEN || process.env.REPLICATE_API_TOKEN === "your_replicate_api_token_here") {
-      return NextResponse.json(
-        { error: "REPLICATE_API_TOKEN is not configured. Add it to .env.local" },
-        { status: 500 }
-      );
-    }
-
-    // --- Validate User Authentication ---
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) {
-      return NextResponse.json({ error: "Unauthorized. Please login first." }, { status: 401 });
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const userId = session.user.email;
 
-    // --- Parse body ---
-    const body = await request.json();
-    const { userImage, outfitImage, mode = "fast" } = body;
-
-    const creditCost = mode === "pro" ? 2 : 1;
-
-    // --- 1. Payload Size Validation (Security) ---
-    // Approximate base64 size check (limit to ~5MB)
-    if (userImage?.length > 7000000 || outfitImage?.length > 7000000) {
-      return NextResponse.json({ error: "Image too large. Max size 5MB." }, { status: 413 });
-    }
+    const { userImage, outfitImage, category = "top", gender = "female" } = await request.json();
 
     if (!userImage || !outfitImage) {
-      return NextResponse.json(
-        { error: "Both userImage and outfitImage are required." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Both human and garment images are required." }, { status: 400 });
     }
 
-    // --- 2. Atomic Credit Reservation (Anti-Hack) ---
-    // We attempt to decrement credits BEFORE calling the model.
-    // This prevents race conditions where a user spams requests.
+    const requestId = crypto.randomUUID();
+    const cost = 1; // Standard cost
+
+    // 1. Atomic Transaction: Deduct Credits + Create START Log
     try {
       await dynamoDb.send(
-        new UpdateCommand({
-          TableName: "users",
-          Key: { userId },
-          UpdateExpression: "SET credits = credits - :cost",
-          ConditionExpression: "credits >= :cost",
-          ExpressionAttributeValues: {
-            ":cost": creditCost,
-          },
-          ReturnValues: "UPDATED_NEW",
+        new TransactWriteCommand({
+          TransactItems: [
+            {
+              Update: {
+                TableName: "users",
+                Key: { userId },
+                UpdateExpression: "SET credits = credits - :cost",
+                ConditionExpression: "credits >= :cost",
+                ExpressionAttributeValues: { ":cost": cost },
+              },
+            },
+            {
+              Put: {
+                TableName: "request_logs",
+                Item: {
+                  requestId,
+                  userId,
+                  status: "STARTED",
+                  credits: cost,
+                  createdAt: new Date().toISOString(),
+                  expiresAt: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7-day TTL
+                },
+              },
+            },
+          ],
         })
       );
     } catch (dbErr) {
-      if (dbErr.name === "ConditionalCheckFailedException") {
-        return NextResponse.json({ error: `Insufficient Credits. ${mode === 'pro' ? 'Pro mode requires 2.' : 'Requires 1 credit.'}` }, { status: 403 });
+      if (dbErr.name === "TransactionCanceledException" || dbErr.message.includes("ConditionalCheckFailed")) {
+        return NextResponse.json({ error: "Insufficient Credits" }, { status: 403 });
       }
-      throw dbErr; // Rethrow other DB errors to general catch
+      throw dbErr;
     }
 
-    // --- Call Replicate ---
-    console.info(JSON.stringify({ event: "generation_started", timestamp: new Date().toISOString() }));
+    // 2. Trigger Replicate with Webhook
+    // Note: WEBHOOK_URL must be publicly accessible (use ngrok locally)
+    const webhookUrl = `${process.env.NEXTAUTH_URL}/api/webhooks/replicate?requestId=${requestId}`;
 
-    const inferenceSteps = mode === "pro" ? 45 : 25;
+    const CATEGORY_MAP = { top: "upper_body", bottom: "lower_body", full: "dresses" };
+    const replicateCategory = CATEGORY_MAP[category] || "upper_body";
 
-    const output = await replicate.run(MODEL, {
+    // Start the prediction asynchronously
+    await replicate.predictions.create({
+      model: "cuuupid/idm-vton",
+      version: "e3893af4fb4bd5741752b35b395348c5f7a9ab5c4776264f5d38e41418081ed7",
       input: {
         human_img: userImage,
         garm_img: outfitImage,
-        garment_des: "clothing item",
-        category: "upper_body",
-        steps: inferenceSteps,
-        seed: 42,
+        garment_des: `high-quality ${gender} ${replicateCategory}`,
+        category: replicateCategory,
+        crop: true,
       },
+      webhook: webhookUrl,
+      webhook_events_filter: ["completed"],
     });
 
-    console.info(JSON.stringify({ event: "generation_model_finished", timestamp: new Date().toISOString() }));
+    return NextResponse.json({ requestId, status: "STARTED" });
 
-    // The model returns a URL string or an array – handle both
-    const replicateUrl = Array.isArray(output) ? output[0] : output;
-
-    if (!replicateUrl) {
-      console.error(JSON.stringify({ event: "generation_failed", reason: "No output URL from external API." }));
-      return NextResponse.json(
-        { error: "Model returned no output. Please try again." },
-        { status: 502 }
-      );
-    }
-    
-    // --- Download and Upload to S3 ---
-    let publicS3Url = replicateUrl; // Fallback to replicate URL natively if no S3 config
-    if (process.env.S3_BUCKET_NAME) {
-      try {
-        console.info(JSON.stringify({ event: "s3_upload_started" }));
-        const imgResponse = await fetch(replicateUrl);
-        const imgBuffer = await imgResponse.arrayBuffer();
-        
-        const fileName = `generated-outfits/fitsnap-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-
-        await s3Client.send(
-          new PutObjectCommand({
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: fileName,
-            Body: Buffer.from(imgBuffer),
-            ContentType: "image/jpeg",
-            // Depending on bucket config, ACL might throw an error if bucket doesn't support ACLs. 
-            // We assume bucket policies allow public read or we're using presigned URLs. 
-            // Usually, standard public S3 config without ACL:
-            // ACL: "public-read",
-          })
-        );
-        
-        // Construct the public URL
-        publicS3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.CUSTOM_AWS_REGION || process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${fileName}`;
-        console.info(JSON.stringify({ event: "s3_upload_success", s3Url: publicS3Url }));
-        
-      } catch (s3Err) {
-        console.error(JSON.stringify({ event: "s3_upload_failed", reason: s3Err.message }));
-        // If S3 fails, we can optionally still return the replicate temporary URL
-      }
-    }
-
-    console.info(JSON.stringify({ event: "generation_success", outputUrl: publicS3Url, timestamp: new Date().toISOString() }));
-    
-    // --- Log Output to History Gallery ---
-
-    // --- Log Output to History Gallery ---
-    try {
-      await dynamoDb.send(
-        new PutCommand({
-          TableName: "generations",
-          Item: {
-            userId,
-            createdAt: new Date().toISOString(),
-            resultUrl: publicS3Url
-          }
-        })
-      );
-      console.info(`[History] Logged generation for ${userId}`);
-
-    } catch (dbErr) {
-      console.error("[Database] Failed to finalize generation state:", dbErr);
-    }
-
-    return NextResponse.json({ resultUrl: publicS3Url });
   } catch (err) {
-    console.error(JSON.stringify({ event: "generation_failed", reason: err.message, stack: err.stack }));
-
-    // Replicate-specific error handling
-    let message = err?.message || "Something went wrong during outfit generation.";
-    const status = err?.response?.status || err?.status || 500;
-
-    if (status === 429 || err?.message?.includes("429")) {
-      message = "Server is busy predicting outfits! Rate limit reached. Please wait 10 seconds and try again.";
-    } else if (status === 402 || err?.message?.includes("402") || err?.message?.includes("Insufficient credit")) {
-      message = "Replicate AI quota exhausted! Your external developer account needs a payment method added to continue generating models.";
-    } else if (status === 422) {
-      // Append the actual error details from Replicate to help debug
-      message = `Invalid input (422): ${err?.message || "Please use a clear, front-facing photo standing straight."}`;
-    }
-
-    return NextResponse.json(
-      { error: message },
-      { status: status === 429 ? 429 : (status === 422 ? 422 : 500) }
-    );
+    console.error("Async Generate Error:", err);
+    return NextResponse.json({ error: "Failed to start generation" }, { status: 500 });
   }
 }
-

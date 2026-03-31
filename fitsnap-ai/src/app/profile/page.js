@@ -129,62 +129,99 @@ export default function ProfilePage() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>Member Studio</h1>
-          <p className={styles.subtitle}>Your personalized fashion HQ & credit management.</p>
+          <p className={styles.subtitle}>Elite access to personalized AI fashion tools.</p>
         </div>
 
         <div className={styles.contentGrid}>
-          {/* Top: Profile Info Header */}
-          <div className={styles.profileHeader}>
-            <div className={styles.avatarWrapper}>
-              <div className={styles.avatar}>
-                {session?.user?.email?.[0].toUpperCase() || "F"}
+          <div className={styles.topRow}>
+            {/* Profile Header Card */}
+            <div className={styles.profileHeader}>
+              <div className={styles.avatarWrapper}>
+                <div className={styles.avatar}>
+                  {session?.user?.email?.[0].toUpperCase() || "F"}
+                </div>
+              </div>
+              <div className={styles.profileInfo}>
+                <span className={styles.memberBadge}>Verified Member</span>
+                <h2>{session?.user?.name || "Premium Member"}</h2>
+                <div className={styles.profileEmail}>{session?.user?.email}</div>
               </div>
             </div>
-            <div className={styles.profileInfo}>
-              <h2>{session?.user?.name || "Premium Member"}</h2>
-              <div className={styles.profileEmail}>{session?.user?.email}</div>
-            </div>
+
+            {/* Premium Member Card */}
+            <section className={styles.memberCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.chip} />
+                <span className={styles.memberType}>Elite Card</span>
+              </div>
+              
+              <div className={styles.creditDisplay}>
+                <div className={styles.creditValue}>
+                  {loadingCredits ? "..." : displayCredits}
+                </div>
+                <span className={styles.creditLabel}>Total Credits</span>
+              </div>
+            </section>
           </div>
 
-          <div className={styles.dashboardGrid}>
-            {/* Left: Premium Member Card & Status */}
-            <div className={styles.sideContent}>
-              <section className={styles.memberCard}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.chip} />
-                  <span className={styles.memberType}>Exclusive Member</span>
-                </div>
-                
-                <div className={styles.creditDisplay}>
-                  <div className={styles.creditValue}>
-                    {loadingCredits ? "..." : displayCredits}
-                  </div>
-                  <span className={styles.creditLabel}>Live Credits Available</span>
-                </div>
-
-                <button 
-                  className={styles.buyCreditsShortcut}
-                  onClick={() => router.push("/pricing")}
-                >
-                  ✨ Buy More Credits
-                </button>
-              </section>
-
-              <div className={styles.profileStats}>
-                <div className={styles.statLine}>
-                  <span>Total Generations</span>
-                  <strong>{history.length}+</strong>
-                </div>
-                <div className={styles.statLine}>
-                  <span>Member Since</span>
-                  <strong>{new Date().getFullYear()}</strong>
+          {/* Quick Actions Grid - Filling the Space */}
+          <section className={styles.actionsSection}>
+            <h3 className={styles.sectionTitle}>Quick Studio Actions</h3>
+            <div className={styles.actionsGrid}>
+              <div className={styles.actionCard} onClick={() => window.location.href = "/"}>
+                <div className={styles.actionIcon}>✨</div>
+                <div className={styles.actionContent}>
+                  <h4>Start Try-On</h4>
+                  <p>Create a new AI outfit generation</p>
                 </div>
               </div>
+              <div className={styles.actionCard} onClick={() => window.location.href = "/wardrobe"}>
+                <div className={styles.actionIcon}>👗</div>
+                <div className={styles.actionContent}>
+                  <h4>My Wardrobe</h4>
+                  <p>View all your saved AI creations</p>
+                </div>
+              </div>
+              <div className={styles.actionCard} onClick={() => window.location.href = "/pricing"}>
+                <div className={styles.actionIcon}>💎</div>
+                <div className={styles.actionContent}>
+                  <h4>Top-up Credits</h4>
+                  <p>Purchase more generation credits</p>
+                </div>
+              </div>
+              <div className={styles.actionCard}>
+                <div className={styles.actionIcon}>💡</div>
+                <div className={styles.actionContent}>
+                  <h4>Pro Tips</h4>
+                  <p>Learn how to get the best AI results</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className={styles.bottomRow}>
+            {/* Left: Stats */}
+            <div className={styles.statsCard}>
+               <h3 className={styles.cardTitle}>Your Impact</h3>
+               <div className={styles.profileStats}>
+                  <div className={styles.statLine}>
+                    <span>Successful Fits</span>
+                    <strong>{history.length}+</strong>
+                  </div>
+                  <div className={styles.statLine}>
+                    <span>Member Since</span>
+                    <strong>{new Date().getFullYear()}</strong>
+                  </div>
+                  <div className={styles.statLine}>
+                    <span>Style Level</span>
+                    <strong>Elite</strong>
+                  </div>
+                </div>
             </div>
 
             {/* Right: Activity Feed */}
-            <section className={styles.card}>
-              <h2 className={styles.cardTitle}>Recent Activity</h2>
+            <section className={styles.activityCard}>
+              <h2 className={styles.cardTitle}>Recent Studio Activity</h2>
               <table className={styles.activityTable}>
                 <thead>
                   <tr>
@@ -198,7 +235,7 @@ export default function ProfilePage() {
                     <tr key={idx}>
                       <td>AI Generation</td>
                       <td>#{item.timestamp?.toString().slice(-6) || "FIT-"+idx}</td>
-                      <td><span className={styles.statusSuccess}>Completed</span></td>
+                      <td><span className={styles.statusSuccess}>Success</span></td>
                     </tr>
                   )) : (
                     <tr>

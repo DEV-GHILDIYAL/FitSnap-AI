@@ -71,11 +71,21 @@ export default function ImageUpload({ label, description, icon, onImageSelect, a
   return (
     <div className={styles.wrapper}>
       <div className={styles.labelRow}>
-        <span className={styles.icon}>{icon}</span>
-        <div>
-          <h3 className={styles.label}>{label}</h3>
-          <p className={styles.description}>{description}</p>
+        <div className={styles.headerMain}>
+          <span className={styles.icon}>{icon}</span>
+          <div className={styles.headerText}>
+            <h3 className={styles.label}>{label}</h3>
+            <p className={styles.description}>{description}</p>
+          </div>
         </div>
+        {label === "Your Photo" && (
+          <div className={styles.proTips}>
+            <span className={styles.tipIcon}>💡</span>
+            <div className={styles.tipText}>
+              <strong>PRO TIP:</strong> Clear light & front view works best!
+            </div>
+          </div>
+        )}
       </div>
 
       <div
