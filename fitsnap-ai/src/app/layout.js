@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import Sidebar from "@/components/Sidebar";
+import UserStatusProvider from "@/components/UserStatusProvider";
 
 const inter = Inter({
   variable: "--font-primary",
@@ -103,6 +104,7 @@ export default function RootLayout({ children }) {
       <body>
         <Providers>
           <div className="app-shell">
+            <UserStatusProvider />
             <Sidebar />
             <main className="main-content">
               {children}

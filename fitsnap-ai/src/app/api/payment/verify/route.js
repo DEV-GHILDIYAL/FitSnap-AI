@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { UpdateCommand, PutCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoDb } from "@/lib/dynamodb";
 
 export async function POST(request) {
@@ -41,17 +41,40 @@ export async function POST(request) {
     };
     creditsToAdd = bundleMap[amount] || Math.floor(amount / 3); // Conservative fallback for manual adjustments
 
-    // 3. Atomically Update DynamoDB Live Credits
+    // 3. Atomic Transaction: Update Credits + Update Revenue + Log Transaction
+    const transactionId = `txn_${razorpay_payment_id}`;
+    
     await dynamoDb.send(
-      new UpdateCommand({
-        TableName: "users",
-        Key: { userId: session.user.email },
-        UpdateExpression: "SET credits = if_not_exists(credits, :start) + :inc",
-        ExpressionAttributeValues: {
-          ":inc": creditsToAdd,
-          ":start": 0
-        },
-        ReturnValues: "UPDATED_NEW" // Validates execution pipeline
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Update: {
+              TableName: "users",
+              Key: { userId: session.user.email },
+              UpdateExpression: "SET credits = if_not_exists(credits, :start) + :inc, totalPaid = if_not_exists(totalPaid, :start) + :amt",
+              ExpressionAttributeValues: {
+                ":inc": creditsToAdd,
+                ":amt": amount,
+                ":start": 0
+              }
+            }
+          },
+          {
+            Put: {
+              TableName: "transactions",
+              Item: {
+                transactionId,
+                userId: session.user.email,
+                amount: amount,
+                credits: creditsToAdd,
+                orderId: razorpay_order_id,
+                paymentId: razorpay_payment_id,
+                status: "SUCCESS",
+                createdAt: new Date().toISOString()
+              }
+            }
+          }
+        ]
       })
     );
 
